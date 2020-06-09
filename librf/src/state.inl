@@ -14,7 +14,7 @@ namespace resumef
 	template<class _PromiseT, typename _Enable>
 	void state_future_t::promise_final_suspend(coroutine_handle<_PromiseT> handler)
 	{
-		scoped_lock<lock_type> __guard(this->_mtx);
+		std::scoped_lock __guard(this->_mtx);
 
 		this->_initor = handler;
 		this->_is_initor = initor_type::Final;
@@ -34,7 +34,7 @@ namespace resumef
 		auto* parent_state = promise.get_state();
 		scheduler_t* sch = parent_state->get_scheduler();
 
-		scoped_lock<lock_type> __guard(this->_mtx);
+		std::scoped_lock __guard(this->_mtx);
 
 		if (this != parent_state)
 		{
@@ -56,7 +56,7 @@ namespace resumef
 	{
 		coroutine_handle<_PromiseT> handler = coroutine_handle<_PromiseT>::from_promise(*promise);
 
-		scoped_lock<lock_type> __guard(this->_mtx);
+		std::scoped_lock __guard(this->_mtx);
 
 		if (!handler.done())
 		{
@@ -82,7 +82,7 @@ namespace resumef
 	{
 		coroutine_handle<_PromiseT> handler = coroutine_handle<_PromiseT>::from_promise(*promise);
 
-		scoped_lock<lock_type> __guard(this->_mtx);
+		std::scoped_lock __guard(this->_mtx);
 
 		if (!handler.done())
 		{
@@ -103,7 +103,7 @@ namespace resumef
 	template<typename _Ty>
 	auto state_t<_Ty>::future_await_resume() -> value_type
 	{
-		scoped_lock<lock_type> __guard(this->_mtx);
+		std::scoped_lock __guard(this->_mtx);
 
 		switch (this->_has_value.load(std::memory_order_acquire))
 		{
@@ -159,7 +159,7 @@ namespace resumef
 	template<typename U>
 	void state_t<_Ty>::set_value(U&& val)
 	{
-		scoped_lock<lock_type> __guard(this->_mtx);
+		std::scoped_lock __guard(this->_mtx);
 		set_value_internal(std::forward<U>(val));
 
 		scheduler_t* sch = this->get_scheduler();
@@ -175,7 +175,7 @@ namespace resumef
 	template<typename _Ty>
 	void state_t<_Ty>::set_exception(std::exception_ptr e)
 	{
-		scoped_lock<lock_type> __guard(this->_mtx);
+		std::scoped_lock __guard(this->_mtx);
 		set_exception_internal(std::move(e));
 
 		scheduler_t* sch = this->get_scheduler();
@@ -196,7 +196,7 @@ namespace resumef
 	{
 		coroutine_handle<_PromiseT> handler = coroutine_handle<_PromiseT>::from_promise(*promise);
 
-		scoped_lock<lock_type> __guard(this->_mtx);
+		std::scoped_lock __guard(this->_mtx);
 
 		if (!handler.done())
 		{
@@ -217,7 +217,7 @@ namespace resumef
 	template<typename _Ty>
 	auto state_t<_Ty&>::future_await_resume() -> reference_type
 	{
-		scoped_lock<lock_type> __guard(this->_mtx);
+		std::scoped_lock __guard(this->_mtx);
 
 		switch (this->_has_value.load(std::memory_order_acquire))
 		{
@@ -266,7 +266,7 @@ namespace resumef
 	template<typename _Ty>
 	void state_t<_Ty&>::set_value(reference_type val)
 	{
-		scoped_lock<lock_type> __guard(this->_mtx);
+		std::scoped_lock __guard(this->_mtx);
 		set_value_internal(val);
 
 		scheduler_t* sch = this->get_scheduler();
@@ -282,7 +282,7 @@ namespace resumef
 	template<typename _Ty>
 	void state_t<_Ty&>::set_exception(std::exception_ptr e)
 	{
-		scoped_lock<lock_type> __guard(this->_mtx);
+		std::scoped_lock __guard(this->_mtx);
 		set_exception_internal(std::move(e));
 
 		scheduler_t* sch = this->get_scheduler();

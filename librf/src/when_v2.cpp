@@ -27,7 +27,7 @@ namespace resumef
 
 		void state_when_t::on_cancel() noexcept
 		{
-			scoped_lock<lock_type> lock_(_lock);
+			std::scoped_lock lock_(_lock);
 
 			_counter.store(0);
 			this->_coro = nullptr;
@@ -35,7 +35,7 @@ namespace resumef
 
 		bool state_when_t::on_notify_one()
 		{
-			scoped_lock<lock_type> lock_(_lock);
+			std::scoped_lock lock_(_lock);
 
 			if (_counter.fetch_sub(1, std::memory_order_acq_rel) == 1)
 			{
@@ -50,7 +50,7 @@ namespace resumef
 
 		bool state_when_t::on_timeout()
 		{
-			scoped_lock<lock_type> lock_(_lock);
+			std::scoped_lock lock_(_lock);
 
 			return false;
 		}

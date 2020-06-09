@@ -11,7 +11,7 @@ namespace resumef
 
 		void event_impl::signal()
 		{
-			scoped_lock<lock_type> lock_(this->_lock);
+			std::scoped_lock lock_(this->_lock);
 
 			++this->_counter;
 
@@ -30,7 +30,7 @@ namespace resumef
 
 		void event_impl::reset()
 		{
-			scoped_lock<lock_type> lock_(this->_lock);
+			std::scoped_lock lock_(this->_lock);
 
 			this->_awakes.clear();
 			this->_counter = 0;
@@ -40,7 +40,7 @@ namespace resumef
 		{
 			assert(awaker);
 
-			scoped_lock<lock_type> lock_(this->_lock);
+			std::scoped_lock lock_(this->_lock);
 
 			if (this->_counter > 0)
 			{
@@ -270,7 +270,7 @@ namespace event_v1
 
 		bool awake(detail::event_impl* eptr)
 		{
-			scoped_lock<lock_type> lock_(this->_lock);
+			std::scoped_lock lock_(this->_lock);
 
 			//如果st为nullptr，则说明之前已经返回过值了。本环境无效了。
 			if (!st.get())

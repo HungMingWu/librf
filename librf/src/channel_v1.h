@@ -52,7 +52,7 @@ namespace resumef
 			{
 				assert(r_awaker);
 
-				scoped_lock<lock_type> lock_(this->_lock);
+				std::scoped_lock lock_(this->_lock);
 
 				bool ret_value;
 				if (_values.size() > 0)
@@ -82,7 +82,7 @@ namespace resumef
 			void write_(channel_write_awaker_ptr&& w_awaker, _Ty2&& val)
 			{
 				assert(w_awaker);
-				scoped_lock<lock_type> lock_(this->_lock);
+				std::scoped_lock lock_(this->_lock);
 
 				//如果满了，则不添加到数据队列，而是将“写等待”和值，放入“写队列”
 				bool is_full = _values.size() >= _max_counter;

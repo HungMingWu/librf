@@ -102,7 +102,7 @@ namespace resumef
 		{
 			assert(sch != nullptr);
 
-			scoped_lock<detail::mutex_v2_impl::lock_type> lock_(_lock);
+			std::scoped_lock lock_(_lock);
 			return try_lock_lockless(sch);
 		}
 
@@ -142,7 +142,7 @@ namespace resumef
 		{
 			assert(sch != nullptr);
 
-			scoped_lock<lock_type> lock_(_lock);
+			std::scoped_lock lock_(_lock);
 
 			void* oldValue = _owner.load(std::memory_order_relaxed);
 			if (oldValue == sch)

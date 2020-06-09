@@ -110,10 +110,8 @@ namespace resumef
 			Exception,
 		};
 
-		//typedef std::recursive_mutex lock_type;
-		typedef spinlock lock_type;
 	protected:
-		mutable lock_type _mtx;
+		mutable spinlock _mtx;
 		coroutine_handle<> _initor;
 		state_future_t* _parent = nullptr;
 #if RESUMEF_DEBUG_COUNTER
@@ -171,7 +169,7 @@ namespace resumef
 
 		inline bool future_await_ready() const noexcept
 		{
-			//scoped_lock<lock_type> __guard(this->_mtx);
+			//std::scoped_lock __guard(this->_mtx);
 			return _has_value.load(std::memory_order_acquire) != result_type::None;
 		}
 		template<class _PromiseT, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
@@ -218,7 +216,6 @@ namespace resumef
 	{
 		friend state_future_t;
 
-		using state_future_t::lock_type;
 		using value_type = _Ty;
 	private:
 		explicit state_t(bool awaitor) noexcept :state_future_t(awaitor) {}
@@ -269,7 +266,6 @@ namespace resumef
 	{
 		friend state_future_t;
 
-		using state_future_t::lock_type;
 		using value_type = _Ty;
 		using reference_type = _Ty&;
 	private:
@@ -308,7 +304,6 @@ namespace resumef
 	struct state_t<void> final : public state_future_t
 	{
 		friend state_future_t;
-		using state_future_t::lock_type;
 	private:
 		explicit state_t(bool awaitor) noexcept :state_future_t(awaitor) {}
 	public:

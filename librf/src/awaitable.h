@@ -14,7 +14,6 @@ namespace resumef
 		using value_type = _Ty;
 		using state_type = state_t<value_type>;
 		using future_type = future_t<value_type>;
-		using lock_type = typename state_type::lock_type;
 		using _Alloc_char = typename state_type::_Alloc_char;
 
 		awaitable_impl_t() noexcept = default;

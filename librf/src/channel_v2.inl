@@ -119,8 +119,7 @@ namespace detail
 
 		const size_t _max_counter;							//数据队列的容量上限
 	public:
-		using lock_type = std::conditional_t<USE_SPINLOCK, spinlock, std::deque<std::recursive_mutex>>;
-		lock_type _lock;									//保证访问本对象是线程安全的
+		std::conditional_t<USE_SPINLOCK, spinlock, std::deque<std::recursive_mutex>> _lock;									//保证访问本对象是线程安全的
 	private:
 		queue_type _values;									//数据队列
 		read_queue_type _read_awakes;						//读队列
@@ -141,7 +140,7 @@ namespace detail
 	template<class _Ty, bool _Optional>
 	inline bool channel_impl_v2<_Ty, _Optional>::try_read(optional_type& val)
 	{
-		scoped_lock<lock_type> lock_(this->_lock);
+		std::scoped_lock lock_(this->_lock);
 		return try_read_nolock(val);
 	}
 
@@ -181,7 +180,7 @@ namespace detail
 	template<class _Ty, bool _Optional>
 	inline bool channel_impl_v2<_Ty, _Optional>::try_write(value_type& val)
 	{
-		scoped_lock<lock_type> lock_(this->_lock);
+		std::scoped_lock lock_(this->_lock);
 		return try_write_nolock(val);
 	}
 
@@ -358,7 +357,7 @@ inline namespace channel_v2
 			//在多线程竞争较为多的时候，先检查是否可用，可以稍微提高点效率
 			if constexpr (optimization_for_multithreading)
 			{
-				scoped_lock<lock_type> lock_(_channel->_lock);
+				std::scoped_lock lock_(_channel->_lock);
 
 				if (_channel->try_read_nolock(_value))
 				{
@@ -371,7 +370,7 @@ inline namespace channel_v2
 		template<class _PromiseT, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
 		bool await_suspend(coroutine_handle<_PromiseT> handler)
 		{
-			scoped_lock<lock_type> lock_(_channel->_lock);
+			std::scoped_lock lock_(_channel->_lock);
 
 			if (_channel->try_read_nolock(_value))
 			{
@@ -423,7 +422,7 @@ inline namespace channel_v2
 			//在多线程竞争较为多的时候，先检查是否可用，可以稍微提高点效率
 			if constexpr (optimization_for_multithreading)
 			{
-				scoped_lock<lock_type> lock_(_channel->_lock);
+				std::scoped_lock lock_(_channel->_lock);
 
 				if (_channel->try_write_nolock(_value))
 				{
@@ -436,7 +435,7 @@ inline namespace channel_v2
 		template<class _PromiseT, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
 		bool await_suspend(coroutine_handle<_PromiseT> handler)
 		{
-			scoped_lock<lock_type> lock_(_channel->_lock);
+			std::scoped_lock lock_(_channel->_lock);
 
 			if (_channel->try_write_nolock(_value))
 			{

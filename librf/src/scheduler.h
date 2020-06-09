@@ -12,7 +12,6 @@ namespace resumef
 	private:
 		using state_sptr = counted_ptr<state_base_t>;
 		using state_vector = std::vector<state_sptr>;
-		using lock_type = spinlock;
 		using task_dictionary_type = std::unordered_map<state_base_t*, std::unique_ptr<task_t>>;
 
 #if !RESUMEF_DISABLE_MULT_THREAD
@@ -80,7 +79,7 @@ namespace resumef
 		bool empty() const
 		{
 #if !RESUMEF_DISABLE_MULT_THREAD
-			scoped_lock<spinlock, spinlock> __guard(_lock_ready, _lock_running);
+			std::scoped_lock __guard(_lock_ready, _lock_running);
 #endif
 			return _ready_task.empty() && _runing_states.empty() && _timer->empty();
 		}
@@ -152,7 +151,7 @@ namespace resumef
 		assert(sptr != nullptr);
 
 #if !RESUMEF_DISABLE_MULT_THREAD
-		scoped_lock<spinlock> __guard(_lock_running);
+		std::scoped_lock __guard(_lock_running);
 #endif
 		_runing_states.emplace_back(sptr);
 	}
@@ -160,7 +159,7 @@ namespace resumef
 	inline void scheduler_t::del_final(state_base_t* sptr)
 	{
 #if !RESUMEF_DISABLE_MULT_THREAD
-		scoped_lock<spinlock> __guard(_lock_ready);
+		std::scoped_lock __guard(_lock_ready);
 #endif
 		this->_ready_task.erase(sptr);
 	}
@@ -170,7 +169,7 @@ namespace resumef
 		state_base_t* sptr = task->_state.get();
 
 #if !RESUMEF_DISABLE_MULT_THREAD
-		scoped_lock<spinlock> __guard(_lock_ready);
+		std::scoped_lock __guard(_lock_ready);
 #endif
 		this->_ready_task.emplace(sptr, std::move(task));
 	}
@@ -178,7 +177,7 @@ namespace resumef
 	inline task_t* scheduler_t::find_task(state_base_t* sptr) const noexcept
 	{
 #if !RESUMEF_DISABLE_MULT_THREAD
-		scoped_lock<spinlock> __guard(_lock_ready);
+		std::scoped_lock __guard(_lock_ready);
 #endif
 
 		auto iter = this->_ready_task.find(sptr);

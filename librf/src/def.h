@@ -31,9 +31,6 @@ namespace resumef
 	using suspend_always = std::experimental::suspend_always;
 	using suspend_never = std::experimental::suspend_never;
 
-	template<class... _Mutexes>
-	using scoped_lock = std::scoped_lock<_Mutexes...>;
-
 	using stop_source = milk::concurrency::stop_source;
 	using stop_token = milk::concurrency::stop_token;
 	template<typename Callback>

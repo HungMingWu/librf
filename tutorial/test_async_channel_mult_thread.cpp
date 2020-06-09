@@ -27,7 +27,7 @@ future_t<> test_channel_consumer(channel_t<std::string> c, size_t cnt)
 			++gcounter;
 #if OUTPUT_DEBUG
 			{
-				scoped_lock<std::mutex> __lock(cout_mutex);
+				std::scoped_lock __lock(cout_mutex);
 				std::cout << "R " << val << "@" << std::this_thread::get_id() << std::endl;
 			}
 #endif
@@ -35,7 +35,7 @@ future_t<> test_channel_consumer(channel_t<std::string> c, size_t cnt)
 		catch (channel_exception& e)
 		{
 			//MAX_CHANNEL_QUEUE=0,并且先读后写，会触发read_before_write异常
-			scoped_lock<std::mutex> __lock(cout_mutex);
+			std::scoped_lock __lock(cout_mutex);
 			std::cout << e.what() << std::endl;
 		}
 
@@ -52,7 +52,7 @@ future_t<> test_channel_producer(channel_t<std::string> c, size_t cnt)
 		co_await c.write(std::to_string(i));
 #if OUTPUT_DEBUG
 		{
-			scoped_lock<std::mutex> __lock(cout_mutex);
+			std::scoped_lock __lock(cout_mutex);
 			std::cout << "W " << i << "@" << std::this_thread::get_id() << std::endl;
 		}
 #endif
@@ -78,7 +78,7 @@ void resumable_main_channel_mult_thread()
 			this_scheduler()->run_until_notask();
 
 			{
-				scoped_lock<std::mutex> __lock(cout_mutex);
+				std::scoped_lock __lock(cout_mutex);
 				std::cout << "Write OK\r\n";
 			}
 		});
@@ -96,7 +96,7 @@ void resumable_main_channel_mult_thread()
 			this_scheduler()->run_until_notask();
 
 			{
-				scoped_lock<std::mutex> __lock(cout_mutex);
+				std::scoped_lock __lock(cout_mutex);
 				std::cout << "Read OK\r\n";
 			}
 		});

@@ -17,7 +17,6 @@ namespace resumef
 		using state_type = state_t<value_type>;
 		using promise_type = promise_t<value_type>;
 		using future_type = future_t<value_type>;
-		using lock_type = typename state_type::lock_type;
 
 		counted_ptr<state_type> _state;
 

@@ -40,7 +40,7 @@ namespace resumef
 
 			inline void* owner() noexcept
 			{
-				scoped_lock<lock_type> lock_(_lock);
+				std::scoped_lock lock_(_lock);
 				return _owner.load(std::memory_order_relaxed);
 			}
 
@@ -51,14 +51,13 @@ namespace resumef
 		public:
 			static constexpr bool USE_SPINLOCK = true;
 
-			using lock_type = std::conditional_t<USE_SPINLOCK, spinlock, std::recursive_mutex>;
 			using state_mutex_ptr = counted_ptr<state_mutex_t>;
 			using wait_queue_type = std::list<state_mutex_ptr>;
 
 			bool try_lock_lockless(void* sch) noexcept;			//内部不加锁，加锁由外部来进行
 			void add_wait_list_lockless(state_mutex_t* state);	//内部不加锁，加锁由外部来进行
 
-			lock_type _lock;									//保证访问本对象是线程安全的
+			std::conditional_t<USE_SPINLOCK, spinlock, std::recursive_mutex> _lock;									//保证访问本对象是线程安全的
 		private:
 			std::atomic<void*> _owner = nullptr;				//锁标记
 			std::atomic<intptr_t> _counter = 0;					//递归锁的次数
@@ -217,7 +216,7 @@ namespace resumef
 				assert(_root != nullptr);
 				assert(_root->get_parent() == nullptr);
 
-				scoped_lock<detail::mutex_v2_impl::lock_type> lock_(_mutex->_lock);
+				std::scoped_lock lock_(_mutex->_lock);
 				if (_mutex->try_lock_lockless(_root))
 					return false;
 

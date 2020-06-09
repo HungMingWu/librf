@@ -109,7 +109,7 @@ namespace resumef
 
 	void state_future_t::resume()
 	{
-		std::unique_lock<lock_type> __guard(_mtx);
+		std::unique_lock __guard(_mtx);
 
 		if (_is_initor == initor_type::Initial)
 		{
@@ -148,14 +148,14 @@ namespace resumef
 
 	bool state_future_t::has_handler() const noexcept
 	{
-		scoped_lock<lock_type> __guard(this->_mtx);
+		std::scoped_lock __guard(this->_mtx);
 		return has_handler_skip_lock();
 	}
 
 	bool state_future_t::switch_scheduler_await_suspend(scheduler_t* sch)
 	{
 		assert(sch != nullptr);
-		scoped_lock<lock_type> __guard(this->_mtx);
+		std::scoped_lock __guard(this->_mtx);
 
 		if (_scheduler != nullptr)
 		{
@@ -180,7 +180,7 @@ namespace resumef
 
 	void state_t<void>::future_await_resume()
 	{
-		scoped_lock<lock_type> __guard(this->_mtx);
+		std::scoped_lock __guard(this->_mtx);
 
 		if (this->_exception)
 			std::rethrow_exception(std::move(this->_exception));
@@ -190,7 +190,7 @@ namespace resumef
 
 	void state_t<void>::set_value()
 	{
-		scoped_lock<lock_type> __guard(this->_mtx);
+		std::scoped_lock __guard(this->_mtx);
 		this->_has_value.store(result_type::Value, std::memory_order_release);
 
 		scheduler_t* sch = this->get_scheduler();
@@ -205,7 +205,7 @@ namespace resumef
 
 	void state_t<void>::set_exception(std::exception_ptr e)
 	{
-		scoped_lock<lock_type> __guard(this->_mtx);
+		std::scoped_lock __guard(this->_mtx);
 		this->_exception = std::move(e);
 
 		scheduler_t* sch = this->get_scheduler();

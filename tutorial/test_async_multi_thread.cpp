@@ -29,13 +29,13 @@ future_t<> heavy_computing_sequential(int64_t val)
 	for(size_t i = 0; i < 3; ++i)
 	{
 		{
-			scoped_lock<std::mutex> __lock(cout_mutex);
+			std::scoped_lock __lock(cout_mutex);
 			std::cout << val << " @" << std::this_thread::get_id() << std::endl;
 		}
 		val = co_await async_heavy_computing_tasks(val);
 	}
 	{
-		scoped_lock<std::mutex> __lock(cout_mutex);
+		std::scoped_lock __lock(cout_mutex);
 		std::cout << val << " @" << std::this_thread::get_id() << std::endl;
 	}
 }
@@ -52,7 +52,7 @@ void test_use_single_thread(int64_t val)
 	local_scheduler_t my_scheduler;
 	
 	{
-		scoped_lock<std::mutex> __lock(cout_mutex);
+		std::scoped_lock __lock(cout_mutex);
 		std::cout << "running in thread @" << std::this_thread::get_id() << std::endl;
 	}
 	go heavy_computing_sequential(val);

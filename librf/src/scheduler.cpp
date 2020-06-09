@@ -99,7 +99,7 @@ namespace resumef
 
 		{
 #if !RESUMEF_DISABLE_MULT_THREAD
-			scoped_lock<spinlock> __guard(_lock_ready);
+			std::scoped_lock __guard(_lock_ready);
 #endif
 			_ready_task.emplace(sptr, task);
 		}
@@ -116,7 +116,7 @@ namespace resumef
 	std::unique_ptr<task_t> scheduler_t::del_switch(state_base_t* sptr)
 	{
 #if !RESUMEF_DISABLE_MULT_THREAD
-		scoped_lock<spinlock> __guard(_lock_ready);
+		std::scoped_lock __guard(_lock_ready);
 #endif
 	
 		std::unique_ptr<task_t> task_ptr;
@@ -134,7 +134,7 @@ namespace resumef
 /*
 	void scheduler_t::cancel_all_task_()
 	{
-		scoped_lock<spinlock, spinlock> __guard(_lock_ready, _lock_running);
+		std::scoped_lock __guard(_lock_ready, _lock_running);
 		
 		this->_ready_task.clear();
 		this->_runing_states.clear();
@@ -153,7 +153,7 @@ namespace resumef
 
 		{
 #if !RESUMEF_DISABLE_MULT_THREAD
-			scoped_lock<spinlock> __guard(_lock_running);
+			std::scoped_lock __guard(_lock_running);
 #endif
 			if (likely(_runing_states.empty()))
 				return false;
@@ -179,7 +179,7 @@ namespace resumef
 
 			{
 #if !RESUMEF_DISABLE_MULT_THREAD
-				scoped_lock<spinlock> __guard(_lock_ready);
+				std::scoped_lock __guard(_lock_ready);
 #endif
 				if (likely(!_ready_task.empty())) continue;	//当前还存在task，则必然还有任务未完成
 			}

@@ -37,7 +37,7 @@ namespace resumef
 			bool awake(_Ety * e, intptr_t count_, const _Types&... args)
 			{
 				assert(count_ > 0);
-				scoped_lock<lock_type> lock_(this->_lock);
+				std::scoped_lock lock_(this->_lock);
 
 				if ((this->_counter.fetch_sub(count_) - count_) <= 0)
 				{

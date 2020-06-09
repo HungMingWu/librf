@@ -160,7 +160,7 @@ namespace resumef
 
 		void event_v2_impl::signal_all() noexcept
 		{
-			scoped_lock<lock_type> lock_(_lock);
+			std::scoped_lock lock_(_lock);
 
 			_counter.store(0, std::memory_order_release);
 
@@ -173,7 +173,7 @@ namespace resumef
 
 		void event_v2_impl::signal() noexcept
 		{
-			scoped_lock<lock_type> lock_(_lock);
+			std::scoped_lock lock_(_lock);
 
 			state_event_ptr state;
 			for (; (state = try_pop_list(_wait_awakes)) != nullptr;)

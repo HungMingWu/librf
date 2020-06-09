@@ -26,7 +26,6 @@ namespace resumef
 			static constexpr bool USE_SPINLOCK = true;
 			static constexpr bool USE_LINK_QUEUE = false;
 
-			using lock_type = std::conditional_t<USE_SPINLOCK, spinlock, std::recursive_mutex>;
 			using state_event_ptr = counted_ptr<state_event_base_t>;
 			using link_state_queue = intrusive_link_queue<state_event_base_t, state_event_ptr>;
 			using wait_queue_type = std::conditional_t<USE_LINK_QUEUE, link_state_queue, std::list<state_event_ptr>>;
@@ -48,7 +47,7 @@ namespace resumef
 				_wait_awakes.push_back(state);
 			}
 
-			lock_type _lock;									//保证访问本对象是线程安全的
+			std::conditional_t<USE_SPINLOCK, spinlock, std::recursive_mutex> _lock;									//保证访问本对象是线程安全的
 		private:
 			std::atomic<intptr_t> _counter;
 			wait_queue_type _wait_awakes;						//等待队列
@@ -157,7 +156,7 @@ namespace resumef
 
 			bool await_ready() noexcept
 			{
-				scoped_lock<detail::event_v2_impl::lock_type> lock_(_event->_lock);
+				std::scoped_lock lock_(_event->_lock);
 				return _event->try_wait_one();
 			}
 
@@ -166,7 +165,7 @@ namespace resumef
 			{
 				(void)cb;
 				detail::event_v2_impl* evt = _event;
-				scoped_lock<detail::event_v2_impl::lock_type> lock_(evt->_lock);
+				std::scoped_lock lock_(evt->_lock);
 
 				if (evt->try_wait_one())
 					return false;
@@ -269,7 +268,7 @@ namespace resumef
 			bool await_suspend2(coroutine_handle<_PromiseT> handler, const _Timeout& cb)
 			{
 				(void)cb;
-				using ref_lock_type = std::reference_wrapper<detail::event_v2_impl::lock_type>;
+				using ref_lock_type = std::reference_wrapper<decltype(detail::event_v2_impl::_lock)>;
 				std::vector<ref_lock_type> lockes;
 				lockes.reserve(std::distance(_begin, _end));
 
@@ -399,7 +398,7 @@ namespace resumef
 				(void)cb;
 				intptr_t count = std::distance(_begin, _end);
 
-				using ref_lock_type = std::reference_wrapper<detail::event_v2_impl::lock_type>;
+				using ref_lock_type = std::reference_wrapper<decltype(detail::event_v2_impl::_lock)>;
 				std::vector<ref_lock_type> lockes;
 				lockes.reserve(count);
 

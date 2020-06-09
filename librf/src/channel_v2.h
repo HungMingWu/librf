@@ -98,7 +98,6 @@ inline namespace channel_v2
 
 		using optional_type = std::conditional_t<use_optional, std::optional<value_type>, value_type>;
 		using channel_type = detail::channel_impl_v2<value_type, use_optional>;
-		using lock_type = typename channel_type::lock_type;
 
 		channel_t(const channel_t&) = default;
 		channel_t(channel_t&&) = default;

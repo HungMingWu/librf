@@ -26,7 +26,7 @@ namespace resumef
 	void timer_manager::clear()
 	{
 #if !RESUMEF_DISABLE_MULT_THREAD
-		std::unique_lock<spinlock> __lock(_added_mtx);
+		std::unique_lock __lock(_added_mtx);
 #endif
 		auto _atimer = std::move(_added_timers);
 #if !RESUMEF_DISABLE_MULT_THREAD
@@ -47,7 +47,7 @@ namespace resumef
 		assert(sptr->st == timer_target::State::Invalid);
 
 #if !RESUMEF_DISABLE_MULT_THREAD
-		scoped_lock<spinlock> __lock(_added_mtx);
+		std::scoped_lock __lock(_added_mtx);
 #endif
 #if _DEBUG
 		assert(sptr->_manager == nullptr);

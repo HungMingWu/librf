@@ -10,7 +10,7 @@ namespace resumef
 
 		void mutex_impl::unlock()
 		{
-			scoped_lock<lock_type> lock_(this->_lock);
+			std::scoped_lock lock_(this->_lock);
 
 			if (_owner != nullptr)
 			{
@@ -37,7 +37,7 @@ namespace resumef
 		{
 			assert(awaker);
 
-			scoped_lock<lock_type> lock_(this->_lock);
+			std::scoped_lock lock_(this->_lock);
 
 			if (_owner == nullptr)
 			{
@@ -56,7 +56,7 @@ namespace resumef
 		{
 			assert(awaker);
 
-			scoped_lock<lock_type> lock_(this->_lock);
+			std::scoped_lock lock_(this->_lock);
 
 			if (_owner == nullptr)
 			{

@@ -45,8 +45,7 @@ namespace resumef
 				return sch;
 			}
 
-			typedef spinlock lock_type;
-			lock_type _lock;
+			spinlock _lock;
 			std::atomic<intptr_t> _counter;
 		};
 
@@ -57,7 +56,6 @@ namespace resumef
 			using state_type = detail::state_when_t;
 			using promise_type = promise_t<value_type>;
 			using future_type = when_future_t<value_type>;
-			using lock_type = typename state_type::lock_type;
 
 			counted_ptr<state_type> _state;
 			std::shared_ptr<value_type> _values;
