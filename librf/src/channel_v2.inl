@@ -4,11 +4,9 @@ namespace resumef
 {
 namespace detail
 {
-	template<class _Ty, class _Chty>
+	template<class value_type, class _Chty>
 	struct state_channel_t : public state_base_t
 	{
-		using value_type = _Ty;
-
 		state_channel_t(_Chty* ch, value_type& val) noexcept
 			: _channel(ch->shared_from_this())
 			, _value(std::addressof(val))
@@ -71,10 +69,10 @@ namespace detail
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
-	template<class _Ty, bool _Optional>
-	struct channel_impl_v2 : public std::enable_shared_from_this<channel_impl_v2<_Ty, _Optional>>
+	template<class value_type, bool _Optional>
+	struct channel_impl_v2 : public std::enable_shared_from_this<channel_impl_v2<value_type, _Optional>>
 	{
-		using value_type = _Ty;
+		//using value_type = _Ty;
 		using optional_type = std::conditional_t<_Optional, std::optional<value_type>, value_type>;
 		using this_type = channel_impl_v2<value_type, _Optional>;
 
@@ -170,22 +168,22 @@ namespace detail
 		return awake_one_writer_(val);
 	}
 
-	template<class _Ty, bool _Optional>
-	inline void channel_impl_v2<_Ty, _Optional>::add_read_list_nolock(state_read_t* state)
+	template<class value_type, bool _Optional>
+	inline void channel_impl_v2<value_type, _Optional>::add_read_list_nolock(state_read_t* state)
 	{
 		assert(state != nullptr);
 		_read_awakes.push_back(state);
 	}
 
-	template<class _Ty, bool _Optional>
-	inline bool channel_impl_v2<_Ty, _Optional>::try_write(value_type& val)
+	template<class value_type, bool _Optional>
+	inline bool channel_impl_v2<value_type, _Optional>::try_write(value_type& val)
 	{
 		std::scoped_lock lock_(this->_lock);
 		return try_write_nolock(val);
 	}
 
-	template<class _Ty, bool _Optional>
-	bool channel_impl_v2<_Ty, _Optional>::try_write_nolock(value_type& val)
+	template<class value_type, bool _Optional>
+	bool channel_impl_v2<value_type, _Optional>::try_write_nolock(value_type& val)
 	{
 		if constexpr (USE_RING_QUEUE)
 		{
@@ -209,15 +207,15 @@ namespace detail
 		return awake_one_reader_(val);
 	}
 
-	template<class _Ty, bool _Optional>
-	inline void channel_impl_v2<_Ty, _Optional>::add_write_list_nolock(state_write_t* state)
+	template<class value_type, bool _Optional>
+	inline void channel_impl_v2<value_type, _Optional>::add_write_list_nolock(state_write_t* state)
 	{
 		assert(state != nullptr);
 		_write_awakes.push_back(state);
 	}
 
-	template<class _Ty, bool _Optional>
-	auto channel_impl_v2<_Ty, _Optional>::try_pop_reader_()->state_read_t*
+	template<class value_type, bool _Optional>
+	auto channel_impl_v2<value_type, _Optional>::try_pop_reader_()->state_read_t*
 	{
 		if constexpr (USE_LINK_QUEUE)
 		{
@@ -235,8 +233,8 @@ namespace detail
 		}
 	}
 
-	template<class _Ty, bool _Optional>
-	auto channel_impl_v2<_Ty, _Optional>::try_pop_writer_()->state_write_t*
+	template<class value_type, bool _Optional>
+	auto channel_impl_v2<value_type, _Optional>::try_pop_writer_()->state_write_t*
 	{
 		if constexpr (USE_LINK_QUEUE)
 		{
@@ -276,8 +274,8 @@ namespace detail
 		}
 	}
 
-	template<class _Ty, bool _Optional>
-	bool channel_impl_v2<_Ty, _Optional>::awake_one_reader_(value_type& val)
+	template<class value_type, bool _Optional>
+	bool channel_impl_v2<value_type, _Optional>::awake_one_reader_(value_type& val)
 	{
 		state_read_t* state = try_pop_reader_();
 		if (state != nullptr)
