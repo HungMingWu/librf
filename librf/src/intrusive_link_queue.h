@@ -2,12 +2,10 @@
 
 namespace resumef
 {
-	template<class _Node, class _Nodeptr = _Node*, class _Sty = uint32_t>
+	template<class node_type, class size_type = uint32_t>
 	struct intrusive_link_queue
 	{
-		using node_type = _Node;
-		using node_ptr_type = _Nodeptr;
-		using size_type = _Sty;
+		using node_ptr_type = std::add_pointer_t<node_type>;
 	public:
 		intrusive_link_queue();
 
@@ -29,8 +27,8 @@ namespace resumef
 	#endif
 	};
 
-	template<class _Node, class _Nodeptr, class _Sty>
-	intrusive_link_queue<_Node, _Nodeptr, _Sty>::intrusive_link_queue()
+	template<class node_type, class size_type>
+	intrusive_link_queue<node_type, size_type>::intrusive_link_queue()
 		: _head(nullptr)
 		, _tail(nullptr)
 	#ifdef _WITH_LOCK_FREE_Q_KEEP_REAL_SIZE
@@ -39,8 +37,8 @@ namespace resumef
 	{
 	}
 
-	template<class _Node, class _Nodeptr, class _Sty>
-	auto intrusive_link_queue<_Node, _Nodeptr, _Sty>::size() const noexcept->size_type
+	template<class node_type, class size_type>
+	auto intrusive_link_queue<node_type, size_type>::size() const noexcept->size_type
 	{
 	#ifdef _WITH_LOCK_FREE_Q_KEEP_REAL_SIZE
 		return m_count.load(std::memory_order_acquire);
@@ -52,14 +50,14 @@ namespace resumef
 	#endif // _WITH_LOCK_FREE_Q_KEEP_REAL_SIZE
 	}
 
-	template<class _Node, class _Nodeptr, class _Sty>
-	bool intrusive_link_queue<_Node, _Nodeptr, _Sty>::empty() const noexcept
+	template<class node_type, class size_type>
+	bool intrusive_link_queue<node_type, size_type>::empty() const noexcept
 	{
 		return _head == nullptr;
 	}
 
-	template<class _Node, class _Nodeptr, class _Sty>
-	void intrusive_link_queue<_Node, _Nodeptr, _Sty>::push_back(node_ptr_type node) noexcept
+	template<class node_type, class size_type>
+	void intrusive_link_queue<node_type, size_type>::push_back(node_ptr_type node) noexcept
 	{
 		assert(node != nullptr);
 
@@ -79,8 +77,8 @@ namespace resumef
 	#endif
 	}
 
-	template<class _Node, class _Nodeptr, class _Sty>
-	auto intrusive_link_queue<_Node, _Nodeptr, _Sty>::try_pop() noexcept->node_ptr_type
+	template<class node_type, class size_type>
+	auto intrusive_link_queue<node_type, size_type>::try_pop() noexcept->node_ptr_type
 	{
 		if (_head == nullptr)
 			return nullptr;
