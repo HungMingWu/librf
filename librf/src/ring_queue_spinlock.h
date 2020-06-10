@@ -6,10 +6,9 @@ namespace resumef
 	//支持多个线程同时push和pop。
 	//_Option : 如果队列保存的数据不支持拷贝只支持移动，则需要设置为true；或者数据希望pop后销毁，都需要设置为true。
 	//_Sty : 内存保持数量和索引的整数类型。用于外部控制队列的结构体大小。
-	template<class _Ty, bool _Option = false, class _Sty = uint32_t>
+	template<class value_type, bool _Option = false, class _Sty = uint32_t>
 	struct ring_queue_spinlock
 	{
-		using value_type = _Ty;
 		using size_type = _Sty;
 
 		static constexpr bool use_option = _Option;

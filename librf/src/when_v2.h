@@ -49,10 +49,9 @@ namespace resumef
 			std::atomic<intptr_t> _counter;
 		};
 
-		template<class _Ty>
+		template<class value_type>
 		struct [[nodiscard]] when_future_t
 		{
-			using value_type = _Ty;
 			using state_type = detail::state_when_t;
 			using promise_type = promise_t<value_type>;
 			using future_type = when_future_t<value_type>;
