@@ -84,6 +84,8 @@ namespace resumef
 		{ *std::begin(v) } ->std::common_with<E&>;
 		//requires std::is_same_v<E, remove_cvref_t<decltype(*std::begin(v))>>;
 	};
+	template <typename T>
+	concept _PromiseT = traits::is_promise_v<T>;
 
 #define COMMA_RESUMEF_ENABLE_IF_TYPENAME() 
 #define COMMA_RESUMEF_ENABLE_IF(...) 
@@ -104,6 +106,7 @@ namespace resumef
 #define _WhenIterT typename
 #define _ContainerT typename
 #define _ContainerOfT typename
+#define _PromiseT typename
 
 #define COMMA_RESUMEF_ENABLE_IF_TYPENAME() ,typename _EnableIf
 #define COMMA_RESUMEF_ENABLE_IF(...) ,typename=std::enable_if_t<__VA_ARGS__>

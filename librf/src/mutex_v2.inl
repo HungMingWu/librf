@@ -206,11 +206,11 @@ namespace resumef
 				return false;
 			}
 
-			template<class _PromiseT, class _Timeout, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-			bool await_suspend2(coroutine_handle<_PromiseT> handler, const _Timeout& cb)
+			template<_PromiseT Promise, class _Timeout>
+			bool await_suspend2(coroutine_handle<Promise> handler, const _Timeout& cb)
 			{
 				(void)cb;
-				_PromiseT& promise = handler.promise();
+				Promise& promise = handler.promise();
 				auto* parent = promise.get_state();
 				_root = parent->get_root();
 				assert(_root != nullptr);
@@ -240,8 +240,8 @@ namespace resumef
 		{
 			using lock_awaiter::lock_awaiter;
 
-			template<class _PromiseT, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-			bool await_suspend(coroutine_handle<_PromiseT> handler)
+			template<_PromiseT Promise>
+			bool await_suspend(coroutine_handle<Promise> handler)
 			{
 				return await_suspend2(handler, nullptr);
 			}
@@ -267,8 +267,8 @@ namespace resumef
 		struct mutex_t::manual_awaiter : public lock_awaiter
 		{
 			using lock_awaiter::lock_awaiter;
-			template<class _PromiseT, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-			bool await_suspend(coroutine_handle<_PromiseT> handler)
+			template<_PromiseT Promise>
+			bool await_suspend(coroutine_handle<Promise> handler)
 			{
 				return await_suspend2(handler, nullptr);
 			}
@@ -309,10 +309,10 @@ namespace resumef
 				return false;
 			}
 
-			template<class _PromiseT, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-			bool await_suspend(coroutine_handle<_PromiseT> handler)
+			template<_PromiseT Promise>
+			bool await_suspend(coroutine_handle<Promise> handler)
 			{
-				_PromiseT& promise = handler.promise();
+				Promise& promise = handler.promise();
 				auto* parent = promise.get_state();
 				if (!_mutex->try_lock(parent->get_root()))
 					_mutex = nullptr;
@@ -356,10 +356,10 @@ namespace resumef
 				return false;
 			}
 
-			template<class _PromiseT, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-			bool await_suspend(coroutine_handle<_PromiseT> handler)
+			template<_PromiseT Promise>
+			bool await_suspend(coroutine_handle<Promise> handler)
 			{
-				_PromiseT& promise = handler.promise();
+				Promise& promise = handler.promise();
 				auto* parent = promise.get_state();
 				_mutex->unlock(parent->get_root());
 

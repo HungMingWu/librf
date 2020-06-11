@@ -33,8 +33,8 @@ namespace resumef
 			return _state->future_await_ready();
 		}
 
-		template<class _PromiseT, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-		void await_suspend(coroutine_handle<_PromiseT> handler)
+		template<_PromiseT Promise>
+		void await_suspend(coroutine_handle<Promise> handler)
 		{
 			_state->future_await_suspend(handler);
 		}

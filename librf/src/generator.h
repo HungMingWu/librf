@@ -99,20 +99,17 @@ namespace resumef
 	/**
 	 * @brief 专用于co_yield函数。
 	 */
-	template <typename _Ty, typename _Alloc>
+	template <typename value_type, typename _Alloc>
 	struct generator_t
 	{
-		using value_type = _Ty;
 		using state_type = state_generator_t;
 
 #ifndef DOXYGEN_SKIP_PROPERTY
 		struct promise_type
 		{
-			using value_type = _Ty;
-			using state_type = state_generator_t;
 			using future_type = generator_t<value_type>;
 
-			_Ty const* _CurrentValue;
+			value_type const* _CurrentValue;
 
 			promise_type()
 			{
@@ -138,14 +135,14 @@ namespace resumef
 				return {};
 			}
 
-			suspend_always yield_value(_Ty const& _Value) noexcept
+			suspend_always yield_value(value_type const& _Value) noexcept
 			{
 				_CurrentValue = std::addressof(_Value);
 				return {};
 			}
 
 			//template<class = std::enable_if_t<!std::is_same_v<_Ty, void>, _Ty>>
-			void return_value(_Ty const& _Value) noexcept
+			void return_value(value_type const& _Value) noexcept
 			{
 				_CurrentValue = std::addressof(_Value);
 			}
@@ -256,7 +253,7 @@ namespace resumef
 		};
 #endif	//DOXYGEN_SKIP_PROPERTY
 
-		using iterator = generator_iterator<_Ty, promise_type>;
+		using iterator = generator_iterator<value_type, promise_type>;
 
 		iterator begin()
 		{

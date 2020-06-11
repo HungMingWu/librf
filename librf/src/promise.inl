@@ -13,10 +13,10 @@ namespace resumef
 		{
 			return false;
 		}
-		template<class _PromiseT, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-		inline void await_suspend(coroutine_handle<_PromiseT> handler) noexcept
+		template<_PromiseT Promise>
+		inline void await_suspend(coroutine_handle<Promise> handler) noexcept
 		{
-			_PromiseT& promise = handler.promise();
+			Promise& promise = handler.promise();
 			auto* _state = promise.get_state();
 			_state->promise_initial_suspend(handler);
 		}
@@ -31,10 +31,10 @@ namespace resumef
 		{
 			return false;
 		}
-		template<class _PromiseT, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-		inline void await_suspend(coroutine_handle<_PromiseT> handler) noexcept
+		template<_PromiseT Promise>
+		inline void await_suspend(coroutine_handle<Promise> handler) noexcept
 		{
-			_PromiseT& promise = handler.promise();
+			Promise& promise = handler.promise();
 			auto* _state = promise.get_state();
 			_state->promise_final_suspend(handler);
 		}

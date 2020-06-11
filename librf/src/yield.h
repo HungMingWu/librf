@@ -15,8 +15,8 @@ namespace resumef
 		{
 			return false;
 		}
-		template<class _PromiseT, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-		bool await_suspend(coroutine_handle<_PromiseT> handler)
+		template<_PromiseT Promise>
+		bool await_suspend(coroutine_handle<Promise> handler)
 		{
 			counted_ptr<state_t<void>> _state = state_future_t::_Alloc_state<state_type>(true);
 			_state->set_value();

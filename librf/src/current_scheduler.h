@@ -11,10 +11,10 @@ namespace resumef
 		{
 			return false;
 		}
-		template<class _PromiseT, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-		bool await_suspend(coroutine_handle<_PromiseT> handler)
+		template<_PromiseT Promise>
+		bool await_suspend(coroutine_handle<Promise> handler)
 		{
-			_PromiseT& promise = handler.promise();
+			Promise& promise = handler.promise();
 			auto* state = promise.get_state();
 			this->_scheduler = state->get_scheduler();
 
@@ -69,10 +69,10 @@ namespace resumef
 		{
 			return false;
 		}
-		template<class _PromiseT, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-		bool await_suspend(coroutine_handle<_PromiseT> handler)
+		template<_PromiseT Promise>
+		bool await_suspend(coroutine_handle<Promise> handler)
 		{
-			_PromiseT& promise = handler.promise();
+			Promise& promise = handler.promise();
 			auto* parent = promise.get_state();
 			this->_state = parent->get_root();
 
@@ -126,10 +126,10 @@ namespace resumef
 		{
 			return false;
 		}
-		template<class _PromiseT, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-		bool await_suspend(coroutine_handle<_PromiseT> handler)
+		template<_PromiseT Promise>
+		bool await_suspend(coroutine_handle<Promise> handler)
 		{
-			_PromiseT& promise = handler.promise();
+			Promise& promise = handler.promise();
 			auto* parent = promise.get_state();
 			state_base_t * state = parent->get_root();
 			scheduler_t* sch = state->get_scheduler();

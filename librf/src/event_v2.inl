@@ -68,10 +68,10 @@ namespace resumef
 			virtual bool on_notify(event_v2_impl* eptr) = 0;
 			virtual bool on_timeout() = 0;
 
-			template<class _PromiseT, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-			scheduler_t* on_await_suspend(coroutine_handle<_PromiseT> handler) noexcept
+			template<_PromiseT Promise>
+			scheduler_t* on_await_suspend(coroutine_handle<Promise> handler) noexcept
 			{
-				_PromiseT& promise = handler.promise();
+				Promise& promise = handler.promise();
 				auto* parent = promise.get_state();
 				scheduler_t* sch = parent->get_scheduler();
 
@@ -160,8 +160,8 @@ namespace resumef
 				return _event->try_wait_one();
 			}
 
-			template<class _PromiseT, class _Timeout, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-			bool await_suspend2(coroutine_handle<_PromiseT> handler, const _Timeout& cb)
+			template<_PromiseT Promise, class _Timeout>
+			bool await_suspend2(coroutine_handle<Promise> handler, const _Timeout& cb)
 			{
 				(void)cb;
 				detail::event_v2_impl* evt = _event;
@@ -182,8 +182,8 @@ namespace resumef
 				return true;
 			}
 
-			template<class _PromiseT, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-			bool await_suspend(coroutine_handle<_PromiseT> handler)
+			template<_PromiseT Promise>
+			bool await_suspend(coroutine_handle<Promise> handler)
 			{
 				return await_suspend2(handler, nullptr);
 			}
@@ -216,8 +216,8 @@ namespace resumef
 				: _Btype(std::forward<Args>(args)...)
 				, _tp(tp)
 			{}
-			template<class _PromiseT, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-			bool await_suspend(coroutine_handle<_PromiseT> handler)
+			template<_PromiseT Promise>
+			bool await_suspend(coroutine_handle<Promise> handler)
 			{
 				if (!_Btype::await_suspend2(handler, [this]
 					{
@@ -264,8 +264,8 @@ namespace resumef
 				return _begin == _end;
 			}
 
-			template<class _PromiseT, class _Timeout, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-			bool await_suspend2(coroutine_handle<_PromiseT> handler, const _Timeout& cb)
+			template<_PromiseT Promise, class _Timeout>
+			bool await_suspend2(coroutine_handle<Promise> handler, const _Timeout& cb)
 			{
 				(void)cb;
 				using ref_lock_type = std::reference_wrapper<decltype(detail::event_v2_impl::_lock)>;
@@ -305,8 +305,8 @@ namespace resumef
 				return true;
 			}
 
-			template<class _PromiseT, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-			bool await_suspend(coroutine_handle<_PromiseT> handler)
+			template<_PromiseT Promise>
+			bool await_suspend(coroutine_handle<Promise> handler)
 			{
 				return await_suspend2(handler, nullptr);
 			}
@@ -392,8 +392,8 @@ namespace resumef
 				return _value;
 			}
 
-			template<class _PromiseT, class _Timeout, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-			bool await_suspend2(coroutine_handle<_PromiseT> handler, const _Timeout& cb)
+			template<_PromiseT Promise, class _Timeout>
+			bool await_suspend2(coroutine_handle<Promise> handler, const _Timeout& cb)
 			{
 				(void)cb;
 				intptr_t count = std::distance(_begin, _end);
@@ -440,8 +440,8 @@ namespace resumef
 				return true;
 			}
 
-			template<class _PromiseT, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-			bool await_suspend(coroutine_handle<_PromiseT> handler)
+			template<_PromiseT Promise>
+			bool await_suspend(coroutine_handle<Promise> handler)
 			{
 				return await_suspend2(handler, nullptr);
 			}

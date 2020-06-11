@@ -1,8 +1,8 @@
 ﻿
 namespace resumef
 {
-	template<class _PromiseT, typename _Enable>
-	void state_future_t::promise_initial_suspend(coroutine_handle<_PromiseT> handler)
+	template<_PromiseT Promise>
+	void state_future_t::promise_initial_suspend(coroutine_handle<Promise> handler)
 	{
 		assert(this->_scheduler == nullptr);
 		assert(!this->_coro);
@@ -11,8 +11,8 @@ namespace resumef
 		this->_is_initor = initor_type::Initial;
 	}
 
-	template<class _PromiseT, typename _Enable>
-	void state_future_t::promise_final_suspend(coroutine_handle<_PromiseT> handler)
+	template<_PromiseT Promise>
+	void state_future_t::promise_final_suspend(coroutine_handle<Promise> handler)
 	{
 		std::scoped_lock __guard(this->_mtx);
 
@@ -27,10 +27,10 @@ namespace resumef
 		sch->del_final(this);
 	}
 
-	template<class _PromiseT, typename _Enable>
-	void state_future_t::future_await_suspend(coroutine_handle<_PromiseT> handler)
+	template<_PromiseT Promise>
+	void state_future_t::future_await_suspend(coroutine_handle<Promise> handler)
 	{
-		_PromiseT& promise = handler.promise();
+		Promise& promise = handler.promise();
 		auto* parent_state = promise.get_state();
 		scheduler_t* sch = parent_state->get_scheduler();
 
@@ -51,10 +51,10 @@ namespace resumef
 
 	//------------------------------------------------------------------------------------------------
 
-	template<class _PromiseT, typename _Enable >
-	void state_t<void>::promise_yield_value(_PromiseT* promise)
+	template<_PromiseT Promise>
+	void state_t<void>::promise_yield_value(Promise* promise)
 	{
-		coroutine_handle<_PromiseT> handler = coroutine_handle<_PromiseT>::from_promise(*promise);
+		coroutine_handle<Promise> handler = coroutine_handle<Promise>::from_promise(*promise);
 
 		std::scoped_lock __guard(this->_mtx);
 
@@ -77,10 +77,10 @@ namespace resumef
 	//------------------------------------------------------------------------------------------------
 
 	template<typename _Ty>
-	template<class _PromiseT, typename U, typename _Enable >
-	void state_t<_Ty>::promise_yield_value(_PromiseT* promise, U&& val)
+	template<_PromiseT Promise, typename U>
+	void state_t<_Ty>::promise_yield_value(Promise* promise, U&& val)
 	{
-		coroutine_handle<_PromiseT> handler = coroutine_handle<_PromiseT>::from_promise(*promise);
+		coroutine_handle<Promise> handler = coroutine_handle<Promise>::from_promise(*promise);
 
 		std::scoped_lock __guard(this->_mtx);
 
@@ -191,10 +191,10 @@ namespace resumef
 	//------------------------------------------------------------------------------------------------
 
 	template<typename _Ty>
-	template<class _PromiseT, typename _Enable >
-	void state_t<_Ty&>::promise_yield_value(_PromiseT* promise, reference_type val)
+	template<_PromiseT Promise>
+	void state_t<_Ty&>::promise_yield_value(Promise* promise, reference_type val)
 	{
-		coroutine_handle<_PromiseT> handler = coroutine_handle<_PromiseT>::from_promise(*promise);
+		coroutine_handle<Promise> handler = coroutine_handle<Promise>::from_promise(*promise);
 
 		std::scoped_lock __guard(this->_mtx);
 

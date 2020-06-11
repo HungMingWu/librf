@@ -32,10 +32,10 @@ namespace resumef
 			bool on_timeout();
 
 			//将自己加入到通知链表里
-			template<class _PromiseT, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-			scheduler_t* on_await_suspend(coroutine_handle<_PromiseT> handler) noexcept
+			template<_PromiseT Promise>
+			scheduler_t* on_await_suspend(coroutine_handle<Promise> handler) noexcept
 			{
-				_PromiseT& promise = handler.promise();
+				Promise& promise = handler.promise();
 				auto* parent_state = promise.get_state();
 				scheduler_t* sch = parent_state->get_scheduler();
 
@@ -70,8 +70,8 @@ namespace resumef
 				return _state->_counter.load(std::memory_order_relaxed) == 0;
 			}
 
-			template<class _PromiseT, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-			void await_suspend(coroutine_handle<_PromiseT> handler)
+			template<_PromiseT Promise>
+			void await_suspend(coroutine_handle<Promise> handler)
 			{
 				_state->on_await_suspend(handler);
 			}

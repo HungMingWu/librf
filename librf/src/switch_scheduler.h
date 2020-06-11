@@ -24,10 +24,10 @@ namespace resumef
 			return false;
 		}
 
-		template<class _PromiseT, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-		bool await_suspend(coroutine_handle<_PromiseT> handler)
+		template<_PromiseT Promise>
+		bool await_suspend(coroutine_handle<Promise> handler)
 		{
-			_PromiseT& promise = handler.promise();
+			Promise& promise = handler.promise();
 			auto* sptr = promise.get_state();
 			if (sptr->switch_scheduler_await_suspend(_scheduler))
 			{

@@ -172,15 +172,15 @@ namespace resumef
 			//std::scoped_lock __guard(this->_mtx);
 			return _has_value.load(std::memory_order_acquire) != result_type::None;
 		}
-		template<class _PromiseT, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-		void future_await_suspend(coroutine_handle<_PromiseT> handler);
+		template<_PromiseT Promise>
+		void future_await_suspend(coroutine_handle<Promise> handler);
 
 		bool switch_scheduler_await_suspend(scheduler_t* sch);
 
-		template<class _PromiseT, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-		void promise_initial_suspend(coroutine_handle<_PromiseT> handler);
-		template<class _PromiseT, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-		void promise_final_suspend(coroutine_handle<_PromiseT> handler);
+		template<_PromiseT Promise>
+		void promise_initial_suspend(coroutine_handle<Promise> handler);
+		template<_PromiseT Promise>
+		void promise_final_suspend(coroutine_handle<Promise> handler);
 
 #if RESUMEF_INLINE_STATE
 		template<class _Sty>
@@ -236,8 +236,8 @@ namespace resumef
 		}
 
 		auto future_await_resume() -> value_type;
-		template<class _PromiseT, typename U, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-		void promise_yield_value(_PromiseT* promise, U&& val);
+		template<_PromiseT Promise, typename U>
+		void promise_yield_value(Promise* promise, U&& val);
 
 		void set_exception(std::exception_ptr e);
 		template<typename U>
@@ -278,8 +278,8 @@ namespace resumef
 		}
 
 		auto future_await_resume()->reference_type;
-		template<class _PromiseT, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-		void promise_yield_value(_PromiseT* promise, reference_type val);
+		template<_PromiseT Promise>
+		void promise_yield_value(Promise* promise, reference_type val);
 
 		void set_exception(std::exception_ptr e);
 		void set_value(reference_type val);
@@ -308,8 +308,8 @@ namespace resumef
 		explicit state_t(bool awaitor) noexcept :state_future_t(awaitor) {}
 	public:
 		void future_await_resume();
-		template<class _PromiseT, typename = std::enable_if_t<traits::is_promise_v<_PromiseT>>>
-		void promise_yield_value(_PromiseT* promise);
+		template<_PromiseT Promise>
+		void promise_yield_value(Promise* promise);
 
 		void set_exception(std::exception_ptr e);
 		void set_value();
