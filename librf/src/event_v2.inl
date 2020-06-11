@@ -61,8 +61,8 @@ namespace resumef
 
 		struct state_event_base_t : public state_base_t
 		{
-			virtual void resume() override;
-			virtual bool has_handler() const  noexcept override;
+			void resume() override;
+			bool has_handler() const  noexcept override;
 
 			virtual void on_cancel() noexcept = 0;
 			virtual bool on_notify(event_v2_impl* eptr) = 0;
@@ -102,9 +102,9 @@ namespace resumef
 				: _value(&val)
 			{}
 
-			virtual void on_cancel() noexcept override;
-			virtual bool on_notify(event_v2_impl* eptr) override;
-			virtual bool on_timeout() override;
+			void on_cancel() noexcept override;
+			bool on_notify(event_v2_impl* eptr) override;
+			bool on_timeout() override;
 		protected:
 			//_value引用awaitor保存的值，这样可以尽可能减少创建state的可能。而不必进入没有state就没有value实体被用于返回。
 			//在调用on_notify()或on_timeout()任意之一后，置为nullptr。
@@ -120,9 +120,9 @@ namespace resumef
 				, _value(&val)
 			{}
 
-			virtual void on_cancel() noexcept override;
-			virtual bool on_notify(event_v2_impl* eptr) override;
-			virtual bool on_timeout() override;
+			void on_cancel() noexcept override;
+			bool on_notify(event_v2_impl* eptr) override;
+			bool on_timeout() override;
 
 			std::atomic<intptr_t> _counter;
 		protected:

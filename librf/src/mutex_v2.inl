@@ -10,9 +10,9 @@ namespace resumef
 				: _value(&val)
 			{}
 
-			virtual void resume() override;
-			virtual bool has_handler() const  noexcept override;
-			virtual state_base_t* get_parent() const noexcept override;
+			void resume() override;
+			bool has_handler() const  noexcept override;
+			state_base_t* get_parent() const noexcept override;
 
 			void on_cancel() noexcept;
 			bool on_notify(mutex_v2_impl* eptr);

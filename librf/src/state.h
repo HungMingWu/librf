@@ -70,11 +70,11 @@ namespace resumef
 	struct state_generator_t : public state_base_t
 	{
 	private:
-		virtual void destroy_deallocate() override;
+		void destroy_deallocate() override;
 		state_generator_t() = default;
 	public:
-		virtual void resume() override;
-		virtual bool has_handler() const  noexcept override;
+		void resume() override;
+		bool has_handler() const  noexcept override;
 
 		bool switch_scheduler_await_suspend(scheduler_t* sch);
 
@@ -137,10 +137,10 @@ namespace resumef
 			_is_future = !awaitor;
 		}
 	public:
-		virtual void destroy_deallocate() override;
-		virtual void resume() override;
-		virtual bool has_handler() const  noexcept override;
-		virtual state_base_t* get_parent() const noexcept override;
+		void destroy_deallocate() override;
+		void resume() override;
+		bool has_handler() const  noexcept override;
+		state_base_t* get_parent() const noexcept override;
 
 		inline bool is_ready() const noexcept
 		{

@@ -13,7 +13,7 @@ namespace detail
 		{
 		}
 
-		virtual void resume() override
+		void resume() override
 		{
 			coroutine_handle<> handler = _coro;
 			if (handler)
@@ -24,7 +24,7 @@ namespace detail
 			}
 		}
 
-		virtual bool has_handler() const  noexcept override
+		bool has_handler() const  noexcept override
 		{
 			return (bool)_coro;
 		}
