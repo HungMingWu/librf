@@ -4,6 +4,14 @@ namespace resumef
 {
 	namespace traits
 	{
+		namespace detail
+		{
+			template <class _Ty1, class _Ty2>
+			concept _Same_impl = std::is_same_v<_Ty1, _Ty2>;
+
+			template <class _Ty1, class _Ty2>
+			concept same_as = _Same_impl<_Ty1, _Ty2> && _Same_impl<_Ty2, _Ty1>;
+		}
 		//is_coroutine_handle<T>
 		//is_coroutine_handle_v<T>
 		//判断是不是coroutine_handle<>类型
@@ -81,27 +89,15 @@ namespace resumef
 		template<class _Ty>
 		constexpr bool is_valid_await_suspend_return_v = std::is_void_v<_Ty> || std::is_same_v<_Ty, bool> || is_coroutine_handle_v<_Ty>;
 
-		template<class _Ty, class = std::void_t<>>
-		struct is_awaitor : std::false_type {};
 		template<class _Ty>
-		struct is_awaitor
-			<_Ty,
-				std::void_t<
-					decltype(std::declval<_Ty>().await_ready())
-					, decltype(std::declval<_Ty>().await_suspend(std::declval<std::experimental::coroutine_handle<promise_t<>>>()))
-					, decltype(std::declval<_Ty>().await_resume())
-				>
-			>
-			: std::bool_constant<
-				std::is_constructible_v<bool, decltype(std::declval<_Ty>().await_ready())>
-				&& is_valid_await_suspend_return_v<
-					decltype(std::declval<_Ty>().await_suspend(std::declval<std::experimental::coroutine_handle<promise_t<>>>()))
-				>
-			>
-		{};
-
-		template<class _Ty>
-		constexpr bool is_awaitor_v = is_awaitor<remove_cvref_t<_Ty>>::value;
+		concept _AwaitorT = requires (_Ty v) {
+			{ v.await_ready() } -> detail::same_as<bool>;
+			{ v.await_suspend(std::declval<std::experimental::coroutine_handle<promise_t<>>>()) };
+			{ v.await_resume() };
+			requires traits::is_valid_await_suspend_return_v<
+				decltype(v.await_suspend(std::declval<std::experimental::coroutine_handle<promise_t<>>>()))
+			>;
+		};
 
 		template <typename T>
 		concept has_state_v = requires (T t) {
@@ -136,7 +132,7 @@ namespace resumef
 			{
 				return operator co_await(static_cast<T&&>(value));
 			}
-			template<class T, std::enable_if_t<is_awaitor_v<T>, int> = 0>
+			template<_AwaitorT T>
 			T&& get_awaitor_impl(T&& value, std::any) noexcept
 			{
 				return static_cast<T&&>(value);
