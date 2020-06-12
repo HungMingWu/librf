@@ -69,12 +69,14 @@ namespace resumef
 		//is_container_of_v<T, E>
 		//判断是不是一个封闭区间的容器，或者数组。其元素类型是E。
 
+		template <class, template <class, class...> class>
+		struct is_instance : public std::false_type {};
+
+		template <class...Ts, template <class, class...> class U>
+		struct is_instance<U<Ts...>, U> : public std::true_type {};
+
 		template<class _Ty>
-		struct is_coroutine_handle : std::false_type {};
-		template<class _PromiseT>
-		struct is_coroutine_handle<coroutine_handle<_PromiseT>> : std::true_type {};
-		template<class _Ty>
-		constexpr bool is_coroutine_handle_v = is_coroutine_handle<remove_cvref_t<_Ty>>::value;
+		concept is_coroutine_handle_v = is_instance<_Ty, coroutine_handle>::value;
 
 		template<class _Ty>
 		constexpr bool is_valid_await_suspend_return_v = std::is_void_v<_Ty> || std::is_same_v<_Ty, bool> || is_coroutine_handle_v<_Ty>;
@@ -97,59 +99,27 @@ namespace resumef
 				>
 			>
 		{};
-		template<class _Ty>
-		struct is_awaitor<_Ty&> : is_awaitor<_Ty> {};
-		template<class _Ty>
-		struct is_awaitor<_Ty&&> : is_awaitor<_Ty> {};
 
 		template<class _Ty>
 		constexpr bool is_awaitor_v = is_awaitor<remove_cvref_t<_Ty>>::value;
 
-		template<class _Ty, class = std::void_t<>>
-		struct is_future : std::false_type {};
-		template<class _Ty>
-		struct is_future<_Ty,
-				std::void_t<
-					decltype(std::declval<_Ty>()._state),
-					typename _Ty::value_type,
-					typename _Ty::state_type,
-					typename _Ty::promise_type
-				>
-			> : std::true_type {};
-		template<class _Ty>
-		constexpr bool is_future_v = is_future<remove_cvref_t<_Ty>>::value;
+		template <typename T>
+		concept has_state_v = requires (T t) {
+			t._state;
+		};
+
+		template <typename T>
+		concept is_future_v = has_state_v<T> && requires {
+			typename T::value_type;
+			typename T::state_type;
+			typename T::promise_type;
+		};
 
 		template<class _Ty>
-		struct is_promise : std::false_type {};
-		template<class _Ty>
-		struct is_promise<promise_t<_Ty>> : std::true_type {};
-		template<class _Ty>
-		constexpr bool is_promise_v = is_promise<remove_cvref_t<_Ty>>::value;
+		concept is_promise_v = is_instance<_Ty, promise_t>::value;
 
 		template<class _Ty>
-		struct is_generator : std::false_type {};
-		template <class _Ty, class _Alloc>
-		struct is_generator<generator_t<_Ty, _Alloc>> : std::true_type {};
-		template<class _Ty>
-		constexpr bool is_generator_v = is_generator<remove_cvref_t<_Ty>>::value;
-
-		template<class _Ty, class = std::void_t<>>
-		struct is_state_pointer : std::false_type {};
-		template<class _Ty>
-		struct is_state_pointer<_Ty, std::void_t<std::enable_if_t<std::is_convertible_v<_Ty, state_base_t*>>>> : std::true_type {};
-		template<class _Ty>
-		struct is_state_pointer<counted_ptr<_Ty>> : is_state_pointer<_Ty> {};
-		template<class _Ty>
-		constexpr bool is_state_pointer_v = is_state_pointer<remove_cvref_t<_Ty>>::value;
-
-
-		template<class _Ty, class = std::void_t<>>
-		struct has_state : std::false_type {};
-		template<class _Ty>
-		struct has_state<_Ty, std::void_t<decltype(std::declval<_Ty>()._state)>> : std::true_type {};
-		template<class _Ty>
-		constexpr bool has_state_v = has_state<remove_cvref_t<_Ty>>::value;
-
+		concept is_generator_v = is_instance<_Ty, generator_t>::value;
 
 		//copy from cppcoro
 		namespace detail
@@ -180,12 +150,16 @@ namespace resumef
 			return detail::get_awaitor_impl(static_cast<T&&>(value), 123);
 		}
 
+		template <typename T>
+		concept get_awaitable = requires(T t) {
+			{ get_awaitor(t) };
+		};
+
 		template<class _Ty, class = std::void_t<>>
 		struct awaitor_traits{};
-		template<class _Ty>
-		struct awaitor_traits<_Ty, 
-			std::void_t<decltype(get_awaitor(std::declval<_Ty>()))>
-		>
+
+		template<get_awaitable _Ty>
+		struct awaitor_traits<_Ty>
 		{
 			using type = decltype(get_awaitor(std::declval<_Ty>()));
 			using value_type = decltype(std::declval<type>().await_resume());
@@ -193,10 +167,10 @@ namespace resumef
 
 		template<class _Ty, class = std::void_t<>>
 		struct is_awaitable : std::false_type {};
-		template<class _Ty>
-		struct is_awaitable<_Ty, 
-			std::void_t<typename awaitor_traits<_Ty>::value_type>
-		> : std::true_type {};
+
+		template<get_awaitable _Ty>
+		struct is_awaitable<_Ty> : std::true_type {};
+
 		template<typename _Ty>
 		constexpr bool is_awaitable_v = is_awaitable<_Ty>::value;
 

@@ -4,7 +4,42 @@ namespace resumef
 {
 	namespace detail
 	{
-		struct state_event_base_t;
+		struct state_event_base_t : public state_base_t
+		{
+			void resume() override;
+			bool has_handler() const  noexcept override;
+
+			virtual void on_cancel() noexcept = 0;
+			virtual bool on_notify(event_v2_impl* eptr) = 0;
+			virtual bool on_timeout() = 0;
+
+			template<_PromiseT Promise>
+			scheduler_t* on_await_suspend(coroutine_handle<Promise> handler) noexcept
+			{
+				Promise& promise = handler.promise();
+				auto* parent = promise.get_state();
+				scheduler_t* sch = parent->get_scheduler();
+
+				this->_scheduler = sch;
+				this->_coro = handler;
+
+				return sch;
+			}
+
+			inline void add_timeout_timer(std::chrono::system_clock::time_point tp)
+			{
+				this->_thandler = this->_scheduler->timer()->add_handler(tp,
+					[st = counted_ptr<state_event_base_t>{ this }](bool canceld)
+				{
+					if (!canceld)
+						st->on_timeout();
+				});
+			}
+
+			//为侵入式单向链表提供的next指针
+			//counted_ptr<state_event_base_t> _next = nullptr;
+			timer_handler _thandler;
+		};
 
 		struct event_v2_impl : public std::enable_shared_from_this<event_v2_impl>
 		{
@@ -57,43 +92,6 @@ namespace resumef
 			event_v2_impl(event_v2_impl&&) = delete;
 			event_v2_impl& operator=(const event_v2_impl&) = delete;
 			event_v2_impl& operator=(event_v2_impl&&) = delete;
-		};
-
-		struct state_event_base_t : public state_base_t
-		{
-			void resume() override;
-			bool has_handler() const  noexcept override;
-
-			virtual void on_cancel() noexcept = 0;
-			virtual bool on_notify(event_v2_impl* eptr) = 0;
-			virtual bool on_timeout() = 0;
-
-			template<_PromiseT Promise>
-			scheduler_t* on_await_suspend(coroutine_handle<Promise> handler) noexcept
-			{
-				Promise& promise = handler.promise();
-				auto* parent = promise.get_state();
-				scheduler_t* sch = parent->get_scheduler();
-
-				this->_scheduler = sch;
-				this->_coro = handler;
-
-				return sch;
-			}
-
-			inline void add_timeout_timer(std::chrono::system_clock::time_point tp)
-			{
-				this->_thandler = this->_scheduler->timer()->add_handler(tp, 
-					[st = counted_ptr<state_event_base_t>{ this }](bool canceld)
-					{
-						if (!canceld)
-							st->on_timeout();
-					});
-			}
-
-			//为侵入式单向链表提供的next指针
-			//counted_ptr<state_event_base_t> _next = nullptr;
-			timer_handler _thandler;
 		};
 
 		struct state_event_t : public state_event_base_t

@@ -6,6 +6,7 @@ namespace resumef
 	 * @brief 专用与state的智能计数指针，通过管理state内嵌的引用计数来管理state的生存期。
 	 */
 	template <typename T>
+	requires std::is_base_of_v<state_base_t, T>
 	struct counted_ptr
 	{
 		/**
