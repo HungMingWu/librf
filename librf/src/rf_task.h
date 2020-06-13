@@ -66,7 +66,7 @@ namespace resumef
 	struct task_impl_t;
 
 #ifndef DOXYGEN_SKIP_PROPERTY
-	template<traits::is_future_v _Ty>
+	template<_FutureT _Ty>
 	struct task_impl_t<_Ty> : public task_t
 	{
 		using future_type = std::remove_reference_t<_Ty>;

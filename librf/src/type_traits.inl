@@ -99,18 +99,6 @@ namespace resumef
 			>;
 		};
 
-		template <typename T>
-		concept has_state_v = requires (T t) {
-			t._state;
-		};
-
-		template <typename T>
-		concept is_future_v = has_state_v<T> && requires {
-			typename T::value_type;
-			typename T::state_type;
-			typename T::promise_type;
-		};
-
 		template<class _Ty>
 		concept is_promise_v = is_instance<_Ty, promise_t>::value;
 

@@ -7,21 +7,21 @@
 namespace resumef
 {
 
-#if RESUMEF_ENABLE_CONCEPT
-
-	template<typename T> 
-	concept _HasStateT = requires(T&& v)
+	template<typename T>
+	concept _HasStateT = requires(T && v)
 	{
-		{ v._state } -> traits::is_instance<counted_ptr>;
+		{ v._state };// ->traits::is_instance<counted_ptr>;
 	};
 
 	template<typename T>
-	concept _FutureT = _AwaitorT<T> && _HasStateT<T> && requires
+	concept _FutureT = traits::_AwaitorT<T> && _HasStateT<T> && requires
 	{
-		{ T::value_type };
-		{ T::state_type };
-		{ T::promise_type };
+		typename T::value_type;
+		typename T::state_type;
+		typename T::promise_type;
 	};
+
+#if RESUMEF_ENABLE_CONCEPT
 
 	template<typename T>
 	concept _CallableT = std::invocable<T>;
@@ -82,8 +82,6 @@ namespace resumef
 
 #else
 
-#define _HasStateT typename
-#define _FutureT typename
 #define _CallableT typename
 //#define _GeneratorT typename
 #define _AwaitableT typename

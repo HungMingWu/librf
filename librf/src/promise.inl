@@ -59,7 +59,7 @@ namespace resumef
 	template <typename _Uty>
 	_Uty&& promise_impl_t<_Ty>::await_transform(_Uty&& _Whatever) noexcept
 	{
-		if constexpr (traits::has_state_v<_Uty>)
+		if constexpr (_FutureT<_Uty>)
 		{
 			_Whatever._state->set_scheduler(get_state()->get_scheduler());
 		}
