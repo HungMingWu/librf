@@ -9,10 +9,9 @@ namespace resumef
 	struct suspend_on_initial;
 	struct suspend_on_final;
 
-	template <typename _Ty>
+	template <typename value_type>
 	struct promise_impl_t
 	{
-		using value_type = _Ty;
 		using state_type = state_t<value_type>;
 		using promise_type = promise_t<value_type>;
 		using future_type = future_t<value_type>;
@@ -48,9 +47,6 @@ namespace resumef
 	template<class _Ty>
 	struct promise_t final : public promise_impl_t<_Ty>
 	{
-		using typename promise_impl_t<_Ty>::value_type;
-		using promise_impl_t<_Ty>::get_return_object;
-
 		template<class U>
 		void return_value(U&& val);	//co_return val
 		template<class U>
@@ -60,9 +56,6 @@ namespace resumef
 	template<class _Ty>
 	struct promise_t<_Ty&> final : public promise_impl_t<_Ty&>
 	{
-		using typename promise_impl_t<_Ty&>::value_type;
-		using promise_impl_t<_Ty&>::get_return_object;
-
 		void return_value(_Ty& val);	//co_return val
 		suspend_always yield_value(_Ty& val);
 	};
@@ -70,8 +63,6 @@ namespace resumef
 	template<>
 	struct promise_t<void> final : public promise_impl_t<void>
 	{
-		using promise_impl_t<void>::get_return_object;
-
 		void return_void();			//co_return;
 		suspend_always yield_value();
 	};

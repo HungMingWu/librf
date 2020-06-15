@@ -340,8 +340,8 @@ namespace resumef
 			return { begin_, end_ };
 		}
 
-		template<class _Cont COMMA_RESUMEF_ENABLE_IF_TYPENAME()>
-		RESUMEF_REQUIRES(_ContainerOfT<_Cont, event_t>)
+		template<class _Cont>
+		requires (traits::is_container_of<_Cont, event_t>::value)
 		auto event_t::wait_any(const _Cont& cnt_) ->event_t::any_awaiter<decltype(std::begin(cnt_))>
 		{
 			return { std::begin(cnt_), std::end(cnt_) };
@@ -364,8 +364,8 @@ namespace resumef
 			return { tp, begin_, end_ };
 		}
 
-		template<class _Rep, class _Period, class _Cont COMMA_RESUMEF_ENABLE_IF_TYPENAME()>
-		RESUMEF_REQUIRES(_ContainerOfT<_Cont, event_t>)
+		template<class _Rep, class _Period, class _Cont>
+		requires (traits::is_container_of<_Cont, event_t>::value)
 		auto event_t::wait_any_for(const std::chrono::duration<_Rep, _Period>& dt, const _Cont& cnt_)
 			->event_t::timeout_any_awaiter<decltype(std::begin(cnt_))>
 		{
@@ -462,8 +462,8 @@ namespace resumef
 			return { begin_, end_ };
 		}
 
-		template<class _Cont COMMA_RESUMEF_ENABLE_IF_TYPENAME()>
-		RESUMEF_REQUIRES(_ContainerOfT<_Cont, event_t>)
+		template<class _Cont>
+		requires (traits::is_container_of<_Cont, event_t>::value)
 		auto event_t::wait_all(const _Cont& cnt_) ->all_awaiter<decltype(std::begin(cnt_))>
 		{
 			return { std::begin(cnt_), std::end(cnt_) };
@@ -485,8 +485,8 @@ namespace resumef
 			return { tp, begin_, end_ };
 		}
 
-		template<class _Rep, class _Period, class _Cont COMMA_RESUMEF_ENABLE_IF_TYPENAME()>
-		RESUMEF_REQUIRES(_ContainerOfT<_Cont, event_t>)
+		template<class _Rep, class _Period, class _Cont>
+		requires (traits::is_container_of<_Cont, event_t>::value)
 		auto event_t::wait_all_for(const std::chrono::duration<_Rep, _Period>& dt, const _Cont& cnt_)
 			->event_t::timeout_all_awaiter<decltype(std::begin(cnt_))>
 		{

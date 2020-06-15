@@ -4,14 +4,6 @@ namespace resumef
 {
 	namespace traits
 	{
-		namespace detail
-		{
-			template <class _Ty1, class _Ty2>
-			concept _Same_impl = std::is_same_v<_Ty1, _Ty2>;
-
-			template <class _Ty1, class _Ty2>
-			concept same_as = _Same_impl<_Ty1, _Ty2> && _Same_impl<_Ty2, _Ty1>;
-		}
 		//is_coroutine_handle<T>
 		//is_coroutine_handle_v<T>
 		//判断是不是coroutine_handle<>类型
@@ -58,10 +50,6 @@ namespace resumef
 		//is_awaitable_v<T>
 		//判断是否可以被co_await操作。可以是一个awaitor，也可以是重载了成员变量的T::operator co_await()，或者被重载了全局的operator co_awaitor(T)
 		//
-		//is_callable<T>
-		//is_callable_v<T>
-		//判断是不是一个可被调用的类型，如函数，仿函数，lambda等
-		//
 		//is_iterator<T>
 		//is_iterator_v<T>
 		//判断是不是一个支持向后迭代的迭代器
@@ -83,15 +71,76 @@ namespace resumef
 		template <class...Ts, template <class, class...> class U>
 		struct is_instance<U<Ts...>, U> : public std::true_type {};
 
+		/// Copy from VC
+		template <class _Ty1, class _Ty2>
+		concept _Same_impl = std::is_same_v<_Ty1, _Ty2>;
+
+		template <class _Ty1, class _Ty2>
+		concept same_as = _Same_impl<_Ty1, _Ty2> && _Same_impl<_Ty2, _Ty1>;
+
+		// CONCEPT convertible_to
+		template <class _From, class _To>
+		concept convertible_to = __is_convertible_to(_From, _To)
+			&& requires(std::add_rvalue_reference_t<_From>(&_Fn)()) {
+			static_cast<_To>(_Fn());
+		};
+
+		// STRUCT TEMPLATE common_reference
+		template <class...>
+		struct common_reference;
+
+		// ALIAS TEMPLATE common_reference_t
+		template <class... _Types>
+		using common_reference_t = typename common_reference<_Types...>::type;
+
+		// N4810 [meta.trans.other]/5.1: "If sizeof...(T) is zero ..."
+		template <>
+		struct common_reference<> {};
+
+		// N4810 [meta.trans.other]/5.2: "...if sizeof...(T) is one ..."
+		template <class _Ty>
+		struct common_reference<_Ty> {
+			using type = _Ty;
+		};
+
+		template <class _Ty1, class _Ty2>
+		concept common_reference_with =
+			requires {
+			typename common_reference_t<_Ty1, _Ty2>;
+			typename common_reference_t<_Ty2, _Ty1>;
+		}
+		&& same_as<common_reference_t<_Ty1, _Ty2>, common_reference_t<_Ty2, _Ty1>>
+			&& convertible_to<_Ty1, common_reference_t<_Ty1, _Ty2>>
+			&& convertible_to<_Ty2, common_reference_t<_Ty1, _Ty2>>;
+
+		template <class _Ty1, class _Ty2>
+		concept common_with =
+			requires {
+			typename std::common_type_t<_Ty1, _Ty2>;
+			typename std::common_type_t<_Ty2, _Ty1>;
+			requires same_as<std::common_type_t<_Ty1, _Ty2>, std::common_type_t<_Ty2, _Ty1>>;
+			static_cast<std::common_type_t<_Ty1, _Ty2>>(std::declval<_Ty1>());
+			static_cast<std::common_type_t<_Ty1, _Ty2>>(std::declval<_Ty2>());
+		}
+		&& common_reference_with<std::add_lvalue_reference_t<const _Ty1>, std::add_lvalue_reference_t<const _Ty2>>
+			&& common_reference_with<std::add_lvalue_reference_t<std::common_type_t<_Ty1, _Ty2>>,
+			common_reference_t<std::add_lvalue_reference_t<const _Ty1>, std::add_lvalue_reference_t<const _Ty2>>>;
+		///
+		template <typename ...Ts>
+		constexpr bool is_instance_v()
+		{
+			return is_instance<Ts...>::value;
+		}
+
 		template<class _Ty>
-		concept is_coroutine_handle_v = is_instance<_Ty, coroutine_handle>::value;
+		concept is_coroutine_handle_v = is_instance_v<_Ty, coroutine_handle>();
 
 		template<class _Ty>
 		constexpr bool is_valid_await_suspend_return_v = std::is_void_v<_Ty> || std::is_same_v<_Ty, bool> || is_coroutine_handle_v<_Ty>;
 
 		template<class _Ty>
 		concept _AwaitorT = requires (_Ty v) {
-			{ v.await_ready() } -> detail::same_as<bool>;
+			{ v.await_ready() } -> same_as<bool>;
 			{ v.await_suspend(std::declval<std::experimental::coroutine_handle<promise_t<>>>()) };
 			{ v.await_resume() };
 			requires traits::is_valid_await_suspend_return_v<
@@ -100,10 +149,15 @@ namespace resumef
 		};
 
 		template<class _Ty>
-		concept is_promise_v = is_instance<_Ty, promise_t>::value;
+		concept is_promise_v = is_instance_v<_Ty, promise_t>();
 
 		template<class _Ty>
 		concept is_generator_v = is_instance<_Ty, generator_t>::value;
+
+		template <class _FTy, class... _ArgTys>
+		concept invocable = requires(_FTy && _Fn, _ArgTys &&... _Args) {
+			std::invoke(static_cast<_FTy&&>(_Fn), static_cast<_ArgTys&&>(_Args)...);
+		};
 
 		//copy from cppcoro
 		namespace detail
@@ -156,15 +210,7 @@ namespace resumef
 		struct is_awaitable<_Ty> : std::true_type {};
 
 		template<typename _Ty>
-		constexpr bool is_awaitable_v = is_awaitable<_Ty>::value;
-
-
-		template<typename _Ty, class = std::void_t<>>
-		struct is_callable : std::false_type{};
-		template<typename _Ty>
-		struct is_callable<_Ty, std::void_t<decltype(std::declval<_Ty>()())>> : std::true_type {};
-		template<typename _Ty>
-		constexpr bool is_callable_v = is_callable<_Ty>::value;
+		concept is_awaitable_v = is_awaitable<_Ty>::value;
 
 		template<class _Ty, class = std::void_t<>>
 		struct is_iterator : std::false_type {};
@@ -228,7 +274,7 @@ namespace resumef
 		template<class _Ty, size_t _Size>
 		struct is_container_of<_Ty(&&)[_Size], _Ty> : std::true_type {};
 
-		template<class _Ty, class _Ety>
-		constexpr bool is_container_of_v = is_container_of<remove_cvref_t<_Ty>, _Ety>::value;
+		//template<class _Ty, class _Ety>
+		//constexpr bool is_container_of_v = is_container_of<remove_cvref_t<_Ty>, _Ety>::value;
 	}
 }

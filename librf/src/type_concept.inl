@@ -21,30 +21,35 @@ namespace resumef
 		typename T::promise_type;
 	};
 
-#if RESUMEF_ENABLE_CONCEPT
+	template<typename T>
+	concept _CallableT = traits::invocable<T>;
 
 	template<typename T>
-	concept _CallableT = std::invocable<T>;
-
-	//template<typename T>
-	//concept _GeneratorT = std::is_same_v<T, generator_t<T>>;
-
-	template<typename T>
-	concept _AwaitableT = requires(T&& v)
+	concept _IteratorT = requires(T && u, T && v)
 	{
-		{ traits::get_awaitor(v) } ->_AwaitorT;
+		{ ++u } -> traits::common_with<T>;
+		{ u != v } -> traits::same_as<bool>;
+		{ *u };
+	};
+
+	template<typename T>
+	concept _AwaitableT = requires(T && v)
+	{
+		{ traits::get_awaitor(v) } -> traits::_AwaitorT;
 	};
 
 	template<typename T>
 	concept _WhenTaskT = _AwaitableT<T> || _CallableT<T>;
 
-	template<typename T>
-	concept _IteratorT = requires(T&& u, T&& v)
-	{
-		{ ++u } ->std::common_with<T>;
-		{ u != v } ->std::same_as<bool>;
-		{ *u };
-	};
+#if RESUMEF_ENABLE_CONCEPT
+
+	//template<typename T>
+	//concept _GeneratorT = std::is_same_v<T, generator_t<T>>;
+
+
+
+
+
 
 	template<typename T, typename E>
 	concept _IteratorOfT = _IteratorT<T> && requires(T&& u)
@@ -82,11 +87,7 @@ namespace resumef
 
 #else
 
-#define _CallableT typename
 //#define _GeneratorT typename
-#define _AwaitableT typename
-#define _WhenTaskT typename
-#define _IteratorT typename
 #define _IteratorOfT typename
 #define _WhenIterT typename
 #define _ContainerT typename
