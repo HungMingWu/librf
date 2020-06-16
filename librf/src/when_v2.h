@@ -111,12 +111,6 @@ namespace resumef
 		template<_WhenTaskT _Ty>
 		using awaitor_result_t = typename awaitor_result_impl2<std::remove_reference_t<_Ty>>::value_type;
 
-		template<class _Ty>
-		concept is_when_task_v = traits::is_awaitable_v<_Ty> || _CallableT<_Ty >;
-
-		template<class _Ty, class _Task = decltype(*std::declval<_Ty>())>
-		concept is_when_task_iter_v = _IteratorT<_Ty> && is_when_task_v<_Task>;
-
 		template<_WhenTaskT _Awaitable>
 		decltype(auto) when_real_awaitor(_Awaitable&& awaitor)
 		{
@@ -127,7 +121,7 @@ namespace resumef
 		}
 
 		template<_WhenTaskT _Awaitable, class _Ty>
-		future_t<> when_all_connector_1(state_when_t* state, _Awaitable task, _Ty& value)
+		future_t<> when_all_connector(state_when_t* state, _Awaitable task, _Ty& value)
 		{
 			decltype(auto) awaitor = when_real_awaitor(task);
 
@@ -138,32 +132,14 @@ namespace resumef
 			state->on_notify_one();
 		};
 
-		template<class _FuckBoolean>
-		using _FuckBoolVectorReference = typename std::vector<_FuckBoolean>::reference;
-
-		template<_WhenTaskT _Awaitable, class _Ty>
-		future_t<> when_all_connector_2(state_when_t* state,_Awaitable task, _FuckBoolVectorReference<_Ty> value)
+		template<class _Tup, class _AwaitTuple, std::size_t... I>
+		inline void when_all_one__(scheduler_t& sch, state_when_t* state, _Tup& values,
+			_AwaitTuple&& awaitables,
+			std::index_sequence<I...>)
 		{
-			auto&& awaitor = when_real_awaitor(task);
-
-			if constexpr(std::is_same_v<_Ty, ignore_type>)
-				co_await awaitor;
-			else
-				value = co_await awaitor;
-			state->on_notify_one();
-		};
-
-		template<class _Tup, size_t _Idx>
-		inline void when_all_one__(scheduler_t& , state_when_t*, _Tup& )
-		{
-		}
-
-		template<class _Tup, size_t _Idx, _WhenTaskT _Awaitable, _WhenTaskT... _Rest>
-		inline void when_all_one__(scheduler_t& sch, state_when_t* state, _Tup& values, _Awaitable&& awaitable, _Rest&&... rest)
-		{
-			sch + when_all_connector_1(state, std::forward<_Awaitable>(awaitable), std::get<_Idx>(values));
-
-			when_all_one__<_Tup, _Idx + 1, _Rest...>(sch, state, values, std::forward<_Rest>(rest)...);
+			(void)std::initializer_list<int> {
+				(sch + when_all_connector(state, std::get<I>(awaitables), std::get<I>(values)), 0)...
+			};
 		}
 
 		template<class _Val, _WhenIterT _Iter>
@@ -174,7 +150,7 @@ namespace resumef
 			intptr_t _Idx = 0;
 			for (; begin != end; ++begin, ++_Idx)
 			{
-				sch + when_all_connector_2<_Awaitable, _Val>(state, *begin, values[_Idx]);
+				sch + when_all_connector<_Awaitable, _Val>(state, *begin, values[_Idx]);
 			}
 		}
 
@@ -213,16 +189,14 @@ namespace resumef
 			}
 		};
 
-		inline void when_any_one__(scheduler_t&, state_when_t*, when_any_pair_ptr, intptr_t)
+		template <class _Awaitable, std::size_t... I>
+		inline void when_any_one__(scheduler_t& sch, state_when_t* state, when_any_pair_ptr value,
+			_Awaitable&& awaitable,
+			std::index_sequence<I...>)
 		{
-		}
-
-		template<_WhenTaskT _Awaitable, _WhenTaskT... _Rest>
-		inline void when_any_one__(scheduler_t& sch, state_when_t* state, when_any_pair_ptr value, intptr_t _Idx, _Awaitable&& awaitable, _Rest&&... rest)
-		{
-			sch + when_any_connector(state, std::forward<_Awaitable>(awaitable), value, _Idx);
-
-			when_any_one__(sch, state, value, _Idx + 1, std::forward<_Rest>(rest)...);
+			(void)std::initializer_list<int> {
+				(sch + when_any_connector(state, std::get<I>(awaitable), value, I), 0)...
+			};
 		}
 
 		template<_WhenIterT _Iter>
@@ -258,14 +232,14 @@ inline namespace when_v2
 	 * @retval [co_await] std::tuple<...>。每个可等待对象的返回值，逐个存入到std::tuple<...>里面。void 返回值，存的是std::ignore。
 	 */
 	template <_WhenTaskT... _Awaitable>
-	requires (detail::is_when_task_v<_Awaitable> && ...)
 	auto when_all(scheduler_t& sch, _Awaitable&&... args)
 		-> detail::when_future_t<std::tuple<detail::awaitor_result_t<_Awaitable>...> >
 	{
 		using tuple_type = std::tuple<detail::awaitor_result_t<_Awaitable>...>;
-
+		auto await_tuple = std::make_tuple(std::forward<_Awaitable>(args)...);
 		detail::when_future_t<tuple_type> awaitor{ sizeof...(_Awaitable) };
-		detail::when_all_one__<tuple_type, 0u, _Awaitable...>(sch, awaitor._state.get(), *awaitor._values, std::forward<_Awaitable>(args)...);
+		detail::when_all_one__<tuple_type>(sch, awaitor._state.get(), *awaitor._values,
+			await_tuple, std::make_index_sequence<std::tuple_size_v<tuple_type>>());
 
 		return awaitor;
 	}
@@ -278,7 +252,6 @@ inline namespace when_v2
 	 * @retval [co_await] std::vector<>。每个可等待对象的返回值，逐个存入到std::vector<>里面。void 返回值，存的是std::ignore。
 	 */
 	template<_WhenIterT _Iter>
-	requires (detail::is_when_task_iter_v<_Iter>)
 	auto when_all(scheduler_t& sch, _Iter begin, _Iter end)
 		-> detail::when_future_t<std::vector<detail::awaitor_result_t<decltype(*std::declval<_Iter>())> > >
 	{
@@ -311,7 +284,6 @@ inline namespace when_v2
 	 * @retval [co_await] std::tuple<...>。每个可等待对象的返回值，逐个存入到std::tuple<...>里面。void 返回值，存的是std::ignore。
 	 */
 	template<_WhenTaskT... _Awaitable>
-	requires (detail::is_when_task_v<_Awaitable> && ...)
 	auto when_all(_Awaitable&&... args)
 		-> future_t<std::tuple<detail::awaitor_result_t<_Awaitable>...>>
 	{
@@ -327,7 +299,6 @@ inline namespace when_v2
 	 * @retval [co_await] std::vector<>。每个可等待对象的返回值，逐个存入到std::vector<>里面。void 返回值，存的是std::ignore。
 	 */
 	template<_WhenIterT _Iter>
-	requires (detail::is_when_task_iter_v<_Iter>)
 	auto when_all(_Iter begin, _Iter end)
 		-> future_t<std::vector<detail::awaitor_result_t<decltype(*begin)>>>
 	{
@@ -357,15 +328,16 @@ inline namespace when_v2
 	 * @retval [co_await] std::pair<intptr_t, std::any>。第一个值指示哪个对象完成了，第二个值存访的对应的返回数据。
 	 */
 	template<_WhenTaskT... _Awaitable>
-	requires (detail::is_when_task_v<_Awaitable> && ...)
 	auto when_any(scheduler_t& sch, _Awaitable&&... args)
 		-> detail::when_future_t<when_any_pair>
 	{
 #pragma warning(disable : 6326)	//warning C6326: Potential comparison of a constant with another constant.
 		detail::when_future_t<when_any_pair> awaitor{ sizeof...(_Awaitable) > 0 ? 1 : 0 };
 #pragma warning(default : 6326)
+		auto await_tuple = std::make_tuple(std::forward<_Awaitable>(args)...);
 		awaitor._values->first = -1;
-		detail::when_any_one__(sch, awaitor._state.get(), awaitor._values, 0, std::forward<_Awaitable>(args)...);
+		detail::when_any_one__(sch, awaitor._state.get(), awaitor._values, await_tuple,
+			std::make_index_sequence<sizeof...(_Awaitable)>());
 
 		return awaitor;
 	}
@@ -378,7 +350,6 @@ inline namespace when_v2
 	 * @retval [co_await] std::pair<intptr_t, std::any>。第一个值指示哪个对象完成了，第二个值存访的对应的返回数据。
 	 */
 	template<_WhenIterT _Iter>
-	requires (detail::is_when_task_iter_v<_Iter>)
 	auto when_any(scheduler_t& sch, _Iter begin, _Iter end)
 		-> detail::when_future_t<when_any_pair>
 	{
@@ -409,7 +380,6 @@ inline namespace when_v2
 	 * @retval [co_await] std::pair<intptr_t, std::any>。第一个值指示哪个对象完成了，第二个值存访的对应的返回数据。
 	 */
 	template<_WhenTaskT... _Awaitable>
-	requires (detail::is_when_task_v<_Awaitable> && ...)
 	auto when_any(_Awaitable&&... args)
 		-> future_t<when_any_pair>
 	{
@@ -425,7 +395,6 @@ inline namespace when_v2
 	 * @retval [co_await] std::pair<intptr_t, std::any>。第一个值指示哪个对象完成了，第二个值存访的对应的返回数据。
 	 */
 	template<_WhenIterT _Iter>
-	requires (detail::is_when_task_iter_v<_Iter>)
 	auto when_any(_Iter begin, _Iter end) 
 		-> future_t<when_any_pair>
 	{

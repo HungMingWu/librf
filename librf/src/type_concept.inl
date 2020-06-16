@@ -68,10 +68,10 @@ namespace resumef
 	};
 
 	template<typename T>
-	concept _GeneratorT = traits::is_instance<T, generator_t>::value;
+	concept _GeneratorT = traits::is_instance_v<generator_t, T>;
 
 	template <typename T>
-	concept _PromiseT = traits::is_instance<T, promise_t>::value;
+	concept _PromiseT = traits::is_instance_v<promise_t, T>;
 
 #if RESUMEF_ENABLE_CONCEPT
 

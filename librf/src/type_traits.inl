@@ -4,64 +4,14 @@ namespace resumef
 {
 	namespace traits
 	{
-		//is_coroutine_handle<T>
-		//is_coroutine_handle_v<T>
-		//判断是不是coroutine_handle<>类型
-		//
-		//is_valid_await_suspend_return_v<T>
-		//判断是不是awaitor的await_suspend()函数的有效返回值
-		//
-		//is_awaitor<T>
-		//is_awaitor_v<T>
-		//判断是不是一个awaitor规范。
-		//一个awaitor可以被co_await操作，要求满足coroutine的awaitor的三个函数接口规范
-		//
-		//is_future<T>
-		//is_future_v<T>
-		//判断是不是一个librf的future规范。
-		//future除了要求是一个awaitor外，还要求定义了value_type/state_type/promise_type三个类型，
-		//并且具备counted_ptr<state_type>类型的_state变量。
-		//
-		//is_state_pointer<T>
-		//is_state_pointer_v<T>
-		//判断是不是一个librf的state_t类的指针或智能指针
-		//
-		//has_state<T>
-		//has_state_v<T>
-		//判断是否具有_state的成员变量
-		//
-		//get_awaitor<T>(T&&t)
-		//通过T获得其被co_await后的awaitor
-		//
-		//awaitor_traits<T>
-		//获得一个awaitor的特征。
-		//	type:awaitor的类型
-		//	value_type:awaitor::await_resume()的返回值类型
-		//
-		//is_awaitable<T>
-		//is_awaitable_v<T>
-		//判断是否可以被co_await操作。可以是一个awaitor，也可以是重载了成员变量的T::operator co_await()，或者被重载了全局的operator co_awaitor(T)
-		//
-		//is_iterator<T>
-		//is_iterator_v<T>
-		//判断是不是一个支持向后迭代的迭代器
-		//
-		//is_iterator_of_v<T, E>
-		//判断是不是一个支持向后迭代的迭代器，并且迭代器通过 operator *()返回的类型是 E&。
-		//
-		//is_container<T>
-		//is_container_v<T>
-		//判断是不是一个封闭区间的容器，或者数组。
-		//
-		//is_container_of<T, E>
-		//is_container_of_v<T, E>
-		//判断是不是一个封闭区间的容器，或者数组。其元素类型是E。
-
-		template <class, template <class, class...> class>
+		template <template <class, class...> class, class>
 		struct is_instance : public std::false_type {};
 
-		template <class...Ts, template <class, class...> class U>
-		struct is_instance<U<Ts...>, U> : public std::true_type {};
+		template <template <class, class...> class U, class...Ts>
+		struct is_instance<U, U<Ts...>> : public std::true_type {};
+
+		template <template <class, class...> class U, class ...Ts>
+		concept is_instance_v = is_instance<U, Ts...>::value;
 
 		/// Copy from VC
 		template <class _Ty1, class _Ty2>
@@ -78,14 +28,9 @@ namespace resumef
 		};
 
 		///
-		template <typename ...Ts>
-		constexpr bool is_instance_v()
-		{
-			return is_instance<Ts...>::value;
-		}
 
 		template<class _Ty>
-		concept is_coroutine_handle_v = is_instance<_Ty, coroutine_handle>::value;
+		concept is_coroutine_handle_v = is_instance_v<coroutine_handle, _Ty>;
 
 		template<class _Ty>
 		constexpr bool is_valid_await_suspend_return_v = std::is_void_v<_Ty> || std::is_same_v<_Ty, bool> || is_coroutine_handle_v<_Ty>;
