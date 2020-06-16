@@ -1,9 +1,5 @@
 #pragma once
 
-#if RESUMEF_ENABLE_CONCEPT
-#include <concepts>
-#endif
-
 namespace resumef
 {
 	template<typename T>
@@ -73,38 +69,18 @@ namespace resumef
 	template <typename T>
 	concept _PromiseT = traits::is_instance_v<promise_t, T>;
 
-#if RESUMEF_ENABLE_CONCEPT
-
-#define COMMA_RESUMEF_ENABLE_IF_TYPENAME() 
-#define COMMA_RESUMEF_ENABLE_IF(...) 
-#define RESUMEF_ENABLE_IF(...) 
-#define RESUMEF_REQUIRES(...) requires __VA_ARGS__
-
-#else
-
-#define COMMA_RESUMEF_ENABLE_IF_TYPENAME() ,typename _EnableIf
-#define COMMA_RESUMEF_ENABLE_IF(...) ,typename=std::enable_if_t<__VA_ARGS__>
-#define RESUMEF_ENABLE_IF(...) typename=std::enable_if_t<__VA_ARGS__>
-#define RESUMEF_REQUIRES(...) 
-
-#endif
-
-#if RESUMEF_ENABLE_CONCEPT
-template<typename T>
-concept _LockAssembleT = requires(T && v)
-{
-	{ v.size() };
-	{ v[0] };
-	{ v._Lock_ref(v[0]) };
-	{ v._Try_lock_ref(v[0]) };
-	{ v._Unlock_ref(v[0]) } ->std::same_as<void>;
-	{ v._Yield() };
-	{ v._ReturnValue() };
-	{ v._ReturnValue(0) };
-	requires std::is_integral_v<decltype(v.size())>;
-};
-#else
-#define _LockAssembleT typename
-#endif
+	template<typename T>
+	concept _LockAssembleT = requires(T && v)
+	{
+		{ v.size() };
+		{ v[0] };
+		{ v._Lock_ref(v[0]) };
+		{ v._Try_lock_ref(v[0]) };
+		{ v._Unlock_ref(v[0]) } -> traits::same_as<void>;
+		{ v._Yield() };
+		{ v._ReturnValue() };
+		{ v._ReturnValue(0) };
+		requires std::is_integral_v<decltype(v.size())>;
+	};
 
 }
