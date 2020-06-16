@@ -115,7 +115,7 @@ namespace resumef
 		concept is_when_task_v = traits::is_awaitable_v<_Ty> || _CallableT<_Ty >;
 
 		template<class _Ty, class _Task = decltype(*std::declval<_Ty>())>
-		concept is_when_task_iter_v = traits::is_iterator_v<_Ty> && is_when_task_v<_Task>;
+		concept is_when_task_iter_v = _IteratorT<_Ty> && is_when_task_v<_Task>;
 
 		template<_WhenTaskT _Awaitable>
 		decltype(auto) when_real_awaitor(_Awaitable&& awaitor)
@@ -298,11 +298,7 @@ inline namespace when_v2
 	 * @param cont 存访可等待对象的容器。容器内存放的，要么是_AwaitableT<>类型，要么是返回_AwaitableT<>类型的函数(对象)。
 	 * @retval [co_await] std::vector<>。每个可等待对象的返回值，逐个存入到std::vector<>里面。void 返回值，存的是std::ignore。
 	 */
-	template<_ContainerT _Cont
-#ifndef DOXYGEN_SKIP_PROPERTY
-		COMMA_RESUMEF_ENABLE_IF(traits::is_container_v<_Cont>)
-#endif	//DOXYGEN_SKIP_PROPERTY
-	>
+	template<_ContainerT _Cont>
 	decltype(auto) when_all(scheduler_t& sch, _Cont& cont)
 	{
 		return when_all(sch, std::begin(cont), std::end(cont));
@@ -345,11 +341,7 @@ inline namespace when_v2
 	 * @param cont 存访可等待对象的容器。容器内存放的，要么是_AwaitableT<>类型，要么是返回_AwaitableT<>类型的函数(对象)。
 	 * @retval [co_await] std::vector<>。每个可等待对象的返回值，逐个存入到std::vector<>里面。void 返回值，存的是std::ignore。
 	 */
-	template<_ContainerT _Cont
-#ifndef DOXYGEN_SKIP_PROPERTY
-		COMMA_RESUMEF_ENABLE_IF(traits::is_container_v<_Cont>)
-#endif	//DOXYGEN_SKIP_PROPERTY
-	>
+	template<_ContainerT _Cont>
 	auto when_all(_Cont&& cont)
 		-> future_t<std::vector<detail::awaitor_result_t<decltype(*std::begin(cont))>>>
 	{
@@ -403,11 +395,7 @@ inline namespace when_v2
 	 * @param cont 存访可等待对象的容器。容器内存放的，要么是_AwaitableT<>类型，要么是返回_AwaitableT<>类型的函数(对象)。
 	 * @retval [co_await] std::pair<intptr_t, std::any>。第一个值指示哪个对象完成了，第二个值存访的对应的返回数据。
 	 */
-	template<_ContainerT _Cont
-#ifndef DOXYGEN_SKIP_PROPERTY
-		COMMA_RESUMEF_ENABLE_IF(traits::is_container_v<_Cont>)
-#endif	//DOXYGEN_SKIP_PROPERTY
-	>
+	template<_ContainerT _Cont>
 	auto when_any(scheduler_t& sch, _Cont& cont)
 		-> detail::when_future_t<when_any_pair>
 	{
@@ -451,11 +439,7 @@ inline namespace when_v2
 	 * @param cont 存访可等待对象的容器。容器内存放的，要么是_AwaitableT<>类型，要么是返回_AwaitableT<>类型的函数(对象)。
 	 * @retval [co_await] std::pair<intptr_t, std::any>。第一个值指示哪个对象完成了，第二个值存访的对应的返回数据。
 	 */
-	template<_ContainerT _Cont
-#ifndef DOXYGEN_SKIP_PROPERTY
-		COMMA_RESUMEF_ENABLE_IF(traits::is_container_v<_Cont>)
-#endif	//DOXYGEN_SKIP_PROPERTY
-	>
+	template <_ContainerT _Cont>
 	auto when_any(_Cont&& cont)
 		-> future_t<when_any_pair>
 	{

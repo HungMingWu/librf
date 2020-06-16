@@ -110,78 +110,52 @@ namespace resumef
 			template<class _Iter>
 			struct [[nodiscard]] any_awaiter;
 
-			template<class _Iter
-#ifndef DOXYGEN_SKIP_PROPERTY
-				COMMA_RESUMEF_ENABLE_IF(traits::is_iterator_of_v<_Iter, event_t>)
-#endif //DOXYGEN_SKIP_PROPERTY
-			>
-#ifndef DOXYGEN_SKIP_PROPERTY
-			RESUMEF_REQUIRES(_IteratorOfT<_Iter, event_t>)
-#endif //DOXYGEN_SKIP_PROPERTY
+			template<class _Iter>
+			requires (_IteratorOfT<_Iter, event_t>)
 			static auto wait_any(_Iter begin_, _Iter end_)
 				->any_awaiter<_Iter>;
 
 			template <class _Cont>
-			requires (traits::is_container_of<_Cont, event_t>::value)
+			requires (_ContainerOfT<_Cont, event_t>)
 			static auto wait_any(const _Cont& cnt_)
 				->any_awaiter<decltype(std::begin(cnt_))>;
 
 			template<class _Iter>
 			struct [[nodiscard]] timeout_any_awaiter;
 
-			template<class _Rep, class _Period, class _Iter
-#ifndef DOXYGEN_SKIP_PROPERTY
-				COMMA_RESUMEF_ENABLE_IF(traits::is_iterator_of_v<_Iter, event_t>)
-#endif //DOXYGEN_SKIP_PROPERTY
-			>
-#ifndef DOXYGEN_SKIP_PROPERTY
-			RESUMEF_REQUIRES(_IteratorOfT<_Iter, event_t>)
-#endif //DOXYGEN_SKIP_PROPERTY
+			template<class _Rep, class _Period, class _Iter>
+			requires (_IteratorOfT<_Iter, event_t>)
 			static auto wait_any_for(const std::chrono::duration<_Rep, _Period>& dt, _Iter begin_, _Iter end_)
 				->timeout_any_awaiter<_Iter>;
 
 			template<class _Rep, class _Period, class _Cont>
-			requires (traits::is_container_of<_Cont, event_t>::value)
+			requires (_ContainerOfT<_Cont, event_t>)
 			static auto wait_any_for(const std::chrono::duration<_Rep, _Period>& dt, const _Cont& cnt_)
 				->timeout_any_awaiter<decltype(std::begin(cnt_))>;
-
-
 
 			template<class _Iter>
 			struct [[nodiscard]] all_awaiter;
 
-			template<class _Iter
-#ifndef DOXYGEN_SKIP_PROPERTY
-				COMMA_RESUMEF_ENABLE_IF(traits::is_iterator_of_v<_Iter, event_t>)
-#endif //DOXYGEN_SKIP_PROPERTY
-			>
-#ifndef DOXYGEN_SKIP_PROPERTY
-				RESUMEF_REQUIRES(_IteratorOfT<_Iter, event_t>)
-#endif //DOXYGEN_SKIP_PROPERTY
+			template<class _Iter>
+			requires (_IteratorOfT<_Iter, event_t>)
 			static auto wait_all(_Iter begin_, _Iter end_)
 				->all_awaiter<_Iter>;
 
 			template<class _Cont>
-			requires (traits::is_container_of<_Cont, event_t>::value)
+			requires (_ContainerOfT<_Cont, event_t>)
 			static auto wait_all(const _Cont& cnt_)
 				->all_awaiter<decltype(std::begin(cnt_))>;
 
 			template<class _Iter>
 			struct [[nodiscard]] timeout_all_awaiter;
 
-			template<class _Rep, class _Period, class _Iter
-#ifndef DOXYGEN_SKIP_PROPERTY
-				COMMA_RESUMEF_ENABLE_IF(traits::is_iterator_of_v<_Iter, event_t>)
-#endif //DOXYGEN_SKIP_PROPERTY
-			>
-#ifndef DOXYGEN_SKIP_PROPERTY
-			RESUMEF_REQUIRES(_IteratorOfT<_Iter, event_t>)
-#endif //DOXYGEN_SKIP_PROPERTY
+			template<class _Rep, class _Period, class _Iter>
+			requires (_IteratorOfT<_Iter, event_t>)
 			static auto wait_all_for(const std::chrono::duration<_Rep, _Period>& dt, _Iter begin_, _Iter end_)
 				->timeout_all_awaiter<_Iter>;
 
 			template<class _Rep, class _Period, class _Cont>
-			requires (traits::is_container_of<_Cont, event_t>::value)
+			requires (_ContainerOfT<_Cont, event_t>)
 			static auto wait_all_for(const std::chrono::duration<_Rep, _Period>& dt, const _Cont& cnt_)
 				->timeout_all_awaiter<decltype(std::begin(cnt_))>;
 

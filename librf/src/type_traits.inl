@@ -85,46 +85,6 @@ namespace resumef
 			static_cast<_To>(_Fn());
 		};
 
-		// STRUCT TEMPLATE common_reference
-		template <class...>
-		struct common_reference;
-
-		// ALIAS TEMPLATE common_reference_t
-		template <class... _Types>
-		using common_reference_t = typename common_reference<_Types...>::type;
-
-		// N4810 [meta.trans.other]/5.1: "If sizeof...(T) is zero ..."
-		template <>
-		struct common_reference<> {};
-
-		// N4810 [meta.trans.other]/5.2: "...if sizeof...(T) is one ..."
-		template <class _Ty>
-		struct common_reference<_Ty> {
-			using type = _Ty;
-		};
-
-		template <class _Ty1, class _Ty2>
-		concept common_reference_with =
-			requires {
-			typename common_reference_t<_Ty1, _Ty2>;
-			typename common_reference_t<_Ty2, _Ty1>;
-		}
-		&& same_as<common_reference_t<_Ty1, _Ty2>, common_reference_t<_Ty2, _Ty1>>
-			&& convertible_to<_Ty1, common_reference_t<_Ty1, _Ty2>>
-			&& convertible_to<_Ty2, common_reference_t<_Ty1, _Ty2>>;
-
-		template <class _Ty1, class _Ty2>
-		concept common_with =
-			requires {
-			typename std::common_type_t<_Ty1, _Ty2>;
-			typename std::common_type_t<_Ty2, _Ty1>;
-			requires same_as<std::common_type_t<_Ty1, _Ty2>, std::common_type_t<_Ty2, _Ty1>>;
-			static_cast<std::common_type_t<_Ty1, _Ty2>>(std::declval<_Ty1>());
-			static_cast<std::common_type_t<_Ty1, _Ty2>>(std::declval<_Ty2>());
-		}
-		&& common_reference_with<std::add_lvalue_reference_t<const _Ty1>, std::add_lvalue_reference_t<const _Ty2>>
-			&& common_reference_with<std::add_lvalue_reference_t<std::common_type_t<_Ty1, _Ty2>>,
-			common_reference_t<std::add_lvalue_reference_t<const _Ty1>, std::add_lvalue_reference_t<const _Ty2>>>;
 		///
 		template <typename ...Ts>
 		constexpr bool is_instance_v()
@@ -212,69 +172,5 @@ namespace resumef
 		template<typename _Ty>
 		concept is_awaitable_v = is_awaitable<_Ty>::value;
 
-		template<class _Ty, class = std::void_t<>>
-		struct is_iterator : std::false_type {};
-		template<class _Ty>
-		struct is_iterator
-			<_Ty,
-				std::void_t<
-					decltype(std::declval<_Ty>() + 1)
-					, decltype(std::declval<_Ty>() != std::declval<_Ty>())
-					, decltype(*std::declval<_Ty>())
-				>
-			>
-			: std::true_type{};
-		template<class _Ty>
-		constexpr bool is_iterator_v = is_iterator<_Ty>::value;
-		template<class _Ty, class _Ety>
-		constexpr bool is_iterator_of_v = std::conjunction<
-				is_iterator<_Ty>
-				, std::is_same<_Ety&, decltype(*std::declval<_Ty>())>
-			>::value;
-
-		template<class _Ty, class = std::void_t<>>
-		struct is_container : std::false_type {};
-		template<class _Ty>
-		struct is_container
-			<_Ty,
-				std::void_t<
-					decltype(std::begin(std::declval<_Ty>()))
-					, decltype(std::end(std::declval<_Ty>()))
-				>
-			>
-			: is_iterator<decltype(std::begin(std::declval<_Ty>()))> {};
-		template<class _Ty, size_t _Size>
-		struct is_container<_Ty[_Size]> : std::true_type {};
-		template<class _Ty, size_t _Size>
-		struct is_container<_Ty(&)[_Size]> : std::true_type {};
-		template<class _Ty, size_t _Size>
-		struct is_container<_Ty(&&)[_Size]> : std::true_type {};
-
-		template<class _Ty>
-		constexpr bool is_container_v = is_container<remove_cvref_t<_Ty>>::value;
-
-		template<class _Ty, class _Ety, class = std::void_t<>>
-		struct is_container_of : std::false_type {};
-		template<class _Ty, class _Ety>
-		struct is_container_of
-			<_Ty, _Ety,
-				std::void_t<
-					decltype(std::begin(std::declval<_Ty>()))
-					, decltype(std::end(std::declval<_Ty>()))
-				>
-			>
-			: std::conjunction<
-				is_iterator<decltype(std::begin(std::declval<_Ty>()))>
-				, std::is_same<_Ety, remove_cvref_t<decltype(*std::begin(std::declval<_Ty>()))>>
-			> {};
-		template<class _Ty, size_t _Size>
-		struct is_container_of<_Ty[_Size], _Ty> : std::true_type {};
-		template<class _Ty, size_t _Size>
-		struct is_container_of<_Ty(&)[_Size], _Ty> : std::true_type {};
-		template<class _Ty, size_t _Size>
-		struct is_container_of<_Ty(&&)[_Size], _Ty> : std::true_type {};
-
-		//template<class _Ty, class _Ety>
-		//constexpr bool is_container_of_v = is_container_of<remove_cvref_t<_Ty>, _Ety>::value;
 	}
 }
