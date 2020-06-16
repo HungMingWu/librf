@@ -54,7 +54,7 @@ namespace resumef
 		 * @retval task_t* 返回代表一个新协程的协程任务类。\n
 		 */
 		template<class _Ty>
-		requires(_CallableT<_Ty> || _FutureT<_Ty> || traits::is_generator_v<_Ty>)
+		requires(_CallableT<_Ty> || _FutureT<_Ty> || _GeneratorT<_Ty>)
 		task_t* operator + (_Ty&& coro)
 		{
 			if constexpr (_CallableT<_Ty>)

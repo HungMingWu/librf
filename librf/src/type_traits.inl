@@ -22,14 +22,6 @@ namespace resumef
 		//future除了要求是一个awaitor外，还要求定义了value_type/state_type/promise_type三个类型，
 		//并且具备counted_ptr<state_type>类型的_state变量。
 		//
-		//is_promise<T>
-		//is_promise_v<T>
-		//判断是不是一个librf的promise_t类
-		//
-		//is_generator<T>
-		//is_generator_v<T>
-		//判断是不是一个librf的generator_t类
-		//
 		//is_state_pointer<T>
 		//is_state_pointer_v<T>
 		//判断是不是一个librf的state_t类的指针或智能指针
@@ -93,7 +85,7 @@ namespace resumef
 		}
 
 		template<class _Ty>
-		concept is_coroutine_handle_v = is_instance_v<_Ty, coroutine_handle>();
+		concept is_coroutine_handle_v = is_instance<_Ty, coroutine_handle>::value;
 
 		template<class _Ty>
 		constexpr bool is_valid_await_suspend_return_v = std::is_void_v<_Ty> || std::is_same_v<_Ty, bool> || is_coroutine_handle_v<_Ty>;
@@ -107,12 +99,6 @@ namespace resumef
 				decltype(v.await_suspend(std::declval<std::experimental::coroutine_handle<promise_t<>>>()))
 			>;
 		};
-
-		template<class _Ty>
-		concept is_promise_v = is_instance_v<_Ty, promise_t>();
-
-		template<class _Ty>
-		concept is_generator_v = is_instance<_Ty, generator_t>::value;
 
 		template <class _FTy, class... _ArgTys>
 		concept invocable = requires(_FTy && _Fn, _ArgTys &&... _Args) {

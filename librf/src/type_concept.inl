@@ -67,14 +67,13 @@ namespace resumef
 		requires std::is_same_v<E, remove_cvref_t<decltype(*std::begin(v))>>;
 	};
 
-#if RESUMEF_ENABLE_CONCEPT
-
-	//template<typename T>
-	//concept _GeneratorT = std::is_same_v<T, generator_t<T>>;
-
+	template<typename T>
+	concept _GeneratorT = traits::is_instance<T, generator_t>::value;
 
 	template <typename T>
-	concept _PromiseT = traits::is_promise_v<T>;
+	concept _PromiseT = traits::is_instance<T, promise_t>::value;
+
+#if RESUMEF_ENABLE_CONCEPT
 
 #define COMMA_RESUMEF_ENABLE_IF_TYPENAME() 
 #define COMMA_RESUMEF_ENABLE_IF(...) 
@@ -82,9 +81,6 @@ namespace resumef
 #define RESUMEF_REQUIRES(...) requires __VA_ARGS__
 
 #else
-
-//#define _GeneratorT typename
-#define _PromiseT typename
 
 #define COMMA_RESUMEF_ENABLE_IF_TYPENAME() ,typename _EnableIf
 #define COMMA_RESUMEF_ENABLE_IF(...) ,typename=std::enable_if_t<__VA_ARGS__>
