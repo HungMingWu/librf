@@ -33,8 +33,8 @@ namespace resumef
 	 * @return [co_await] void
 	 * @throw timer_canceled_exception 如果定时器被取消，则抛此异常。
 	 */
-	template<class _Rep, class _Period>
-	inline future_t<> sleep_for(std::chrono::duration<_Rep, _Period> dt_, scheduler_t& scheduler_)
+	template <_ChronoDurationT Duration>
+	inline future_t<> sleep_for(Duration dt_, scheduler_t& scheduler_)
 	{
 		return sleep_for_(std::chrono::duration_cast<std::chrono::system_clock::duration>(dt_), scheduler_);
 	}
@@ -45,8 +45,8 @@ namespace resumef
 	 * @return [co_await] void
 	 * @throw timer_canceled_exception 如果定时器被取消，则抛此异常。
 	 */
-	template<class _Clock, class _Duration = typename _Clock::duration>
-	inline future_t<> sleep_until(std::chrono::time_point<_Clock, _Duration> tp_, scheduler_t& scheduler_)
+	template <_ChronoTimePointT TimePoint>
+	inline future_t<> sleep_until(TimePoint tp_, scheduler_t& scheduler_)
 	{
 		return sleep_until_(std::chrono::time_point_cast<std::chrono::system_clock::duration>(tp_), scheduler_);
 	}
@@ -57,8 +57,8 @@ namespace resumef
 	 * @return [co_await] void
 	 * @throw timer_canceled_exception 如果定时器被取消，则抛此异常。
 	 */
-	template<class _Rep, class _Period>
-	inline future_t<> sleep_for(std::chrono::duration<_Rep, _Period> dt_)
+	template <_ChronoDurationT Duration>
+	inline future_t<> sleep_for(Duration dt_)
 	{
 		scheduler_t* sch = current_scheduler();
 		co_await sleep_for_(std::chrono::duration_cast<std::chrono::system_clock::duration>(dt_), *sch);
@@ -70,8 +70,8 @@ namespace resumef
 	 * @return [co_await] void
 	 * @throw timer_canceled_exception 如果定时器被取消，则抛此异常。
 	 */
-	template<class _Clock, class _Duration>
-	inline future_t<> sleep_until(std::chrono::time_point<_Clock, _Duration> tp_)
+	template<_ChronoTimePointT TimePoint>
+	inline future_t<> sleep_until(TimePoint tp_)
 	{
 		scheduler_t* sch = current_scheduler();
 		co_await sleep_until_(std::chrono::time_point_cast<std::chrono::system_clock::duration>(tp_), *sch);

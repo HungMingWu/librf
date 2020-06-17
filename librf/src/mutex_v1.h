@@ -60,15 +60,15 @@ namespace mutex_v1
 		bool try_lock() const;
 
 		/*
-		template<class _Rep, class _Period>
+		template<_ChronoDurationT Duration>
 		awaitable_t<bool>
-			try_lock_for(const std::chrono::duration<_Rep, _Period> & dt) const
+			try_lock_for(const Duration & dt) const
 		{
 			return try_lock_for_(std::chrono::duration_cast<clock_type::duration>(dt));
 		}
-		template<class _Clock, class _Duration>
+		template<_ChronoTimePointT TimePoint>
 		awaitable_t<bool>
-			try_lock_until(const std::chrono::time_point<_Clock, _Duration> & tp) const
+			try_lock_until(const TimePoint& tp) const
 		{
 			return try_lock_until_(std::chrono::time_point_cast<clock_type::duration>(tp));
 		}

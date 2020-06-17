@@ -233,15 +233,15 @@ namespace resumef
 			using timeout_awaitor_impl<awaiter>::timeout_awaitor_impl;
 		};
 
-		template<class _Rep, class _Period>
-		inline event_t::timeout_awaiter event_t::wait_for(const std::chrono::duration<_Rep, _Period>& dt) const noexcept
+		template <_ChronoDurationT Duration>
+		inline event_t::timeout_awaiter event_t::wait_for(const Duration& dt) const noexcept
 		{
 			clock_type::time_point tp2 = clock_type::now() + std::chrono::duration_cast<clock_type::duration>(dt);
 			return { tp2, _event.get() };
 		}
 
-		template<class _Clock, class _Duration>
-		inline event_t::timeout_awaiter event_t::wait_until(const std::chrono::time_point<_Clock, _Duration>& tp) const noexcept
+		template <_ChronoTimePointT TimePoint>
+		inline event_t::timeout_awaiter event_t::wait_until(const TimePoint& tp) const noexcept
 		{
 			clock_type::time_point tp2 = std::chrono::time_point_cast<clock_type::duration>(tp);
 			return { tp2, _event.get() };
@@ -355,18 +355,18 @@ namespace resumef
 			using timeout_awaitor_impl<any_awaiter<_Iter>>::timeout_awaitor_impl;
 		};
 
-		template<class _Rep, class _Period, class _Iter>
+		template<_ChronoDurationT Duration, class _Iter>
 		requires (_IteratorOfT<_Iter, event_t>)
-		auto event_t::wait_any_for(const std::chrono::duration<_Rep, _Period>& dt, _Iter begin_, _Iter end_) 
+		auto event_t::wait_any_for(const Duration& dt, _Iter begin_, _Iter end_) 
 			->event_t::timeout_any_awaiter<_Iter>
 		{
 			clock_type::time_point tp = clock_type::now() + std::chrono::duration_cast<clock_type::duration>(dt);
 			return { tp, begin_, end_ };
 		}
 
-		template<class _Rep, class _Period, class _Cont>
+		template<_ChronoDurationT Duration, class _Cont>
 		requires (_ContainerOfT<_Cont, event_t>)
-		auto event_t::wait_any_for(const std::chrono::duration<_Rep, _Period>& dt, const _Cont& cnt_)
+		auto event_t::wait_any_for(const Duration& dt, const _Cont& cnt_)
 			->event_t::timeout_any_awaiter<decltype(std::begin(cnt_))>
 		{
 			clock_type::time_point tp = clock_type::now() + std::chrono::duration_cast<clock_type::duration>(dt);
@@ -476,18 +476,18 @@ namespace resumef
 			using timeout_awaitor_impl<all_awaiter<_Iter>>::timeout_awaitor_impl;
 		};
 
-		template<class _Rep, class _Period, class _Iter>
+		template <_ChronoDurationT Duration, class _Iter>
 		requires (_IteratorOfT<_Iter, event_t>)
-		auto event_t::wait_all_for(const std::chrono::duration<_Rep, _Period>& dt, _Iter begin_, _Iter end_)
+		auto event_t::wait_all_for(const Duration& dt, _Iter begin_, _Iter end_)
 			->event_t::timeout_all_awaiter<_Iter>
 		{
 			clock_type::time_point tp = clock_type::now() + std::chrono::duration_cast<clock_type::duration>(dt);
 			return { tp, begin_, end_ };
 		}
 
-		template<class _Rep, class _Period, class _Cont>
+		template <_ChronoDurationT Duration, class _Cont>
 		requires (_ContainerOfT<_Cont, event_t>)
-		auto event_t::wait_all_for(const std::chrono::duration<_Rep, _Period>& dt, const _Cont& cnt_)
+		auto event_t::wait_all_for(const Duration& dt, const _Cont& cnt_)
 			->event_t::timeout_all_awaiter<decltype(std::begin(cnt_))>
 		{
 			clock_type::time_point tp = clock_type::now() + std::chrono::duration_cast<clock_type::duration>(dt);

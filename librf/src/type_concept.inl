@@ -83,4 +83,10 @@ namespace resumef
 		requires std::is_integral_v<decltype(v.size())>;
 	};
 
+	template <typename T>
+	concept _ChronoDurationT = traits::is_std_chrono_duration_v<T>;
+
+	template <typename T>
+	concept _ChronoTimePointT = traits::is_std_chrono_time_point_v<T>;
+
 }

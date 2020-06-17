@@ -393,14 +393,14 @@ namespace resumef
 			}
 		};
 
-		template <class _Rep, class _Period>
-		inline mutex_t::timeout_awaiter mutex_t::try_lock_until(const std::chrono::time_point<_Rep, _Period>& tp) const noexcept
+		template <_ChronoTimePointT TimePoint>
+		inline mutex_t::timeout_awaiter mutex_t::try_lock_until(const TimePoint& tp) const noexcept
 		{
 			return { tp, _mutex.get() };
 		}
 
-		template <class _Rep, class _Period>
-		inline mutex_t::timeout_awaiter mutex_t::try_lock_for(const std::chrono::duration<_Rep, _Period>& dt) const noexcept
+		template <_ChronoDurationT Duration>
+		inline mutex_t::timeout_awaiter mutex_t::try_lock_for(const Duration& dt) const noexcept
 		{
 			auto tp = clock_type::now() + std::chrono::duration_cast<clock_type::duration>(dt);
 			return { tp, _mutex.get() };
@@ -419,15 +419,15 @@ namespace resumef
 			return _mutex->try_lock(unique_address);
 		}
 
-		template <class _Rep, class _Period>
-		inline bool mutex_t::try_lock_for(const std::chrono::duration<_Rep, _Period>& dt, void* unique_address)
+		template <_ChronoDurationT Duration>
+		inline bool mutex_t::try_lock_for(const Duration& dt, void* unique_address)
 		{
 			assert(unique_address != nullptr);
 			return _mutex->try_lock_until(clock_type::now() + std::chrono::duration_cast<clock_type::duration>(dt), unique_address);
 		}
 
-		template <class _Rep, class _Period>
-		inline bool mutex_t::try_lock_until(const std::chrono::time_point<_Rep, _Period>& tp, void* unique_address)
+		template <_ChronoTimePointT TimePoint>
+		inline bool mutex_t::try_lock_until(const TimePoint& tp, void* unique_address)
 		{
 			assert(unique_address != nullptr);
 			return _mutex->try_lock_until(std::chrono::time_point_cast<clock_type::time_point>(tp), unique_address);

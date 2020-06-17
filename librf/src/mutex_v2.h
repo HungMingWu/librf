@@ -87,16 +87,16 @@ namespace resumef
 			 * @param dt 超时时长
 			 * @return [co_await] bool
 			 */
-			template <class _Rep, class _Period>
-			timeout_awaiter/*bool*/ try_lock_for(const std::chrono::duration<_Rep, _Period>& dt) const noexcept;
+			template <_ChronoDurationT Duration>
+			timeout_awaiter/*bool*/ try_lock_for(const Duration& dt) const noexcept;
 
 			/**
 			 * @brief 在协程中尝试加锁，直到超时。如果不能立即获得锁，则阻塞当前协程。但不会阻塞当前线程。
 			 * @param tp 超时时刻
 			 * @return [co_await] bool
 			 */
-			template <class _Rep, class _Period>
-			timeout_awaiter/*bool*/ try_lock_until(const std::chrono::time_point<_Rep, _Period>& tp) const noexcept;
+			template <_ChronoTimePointT TimePoint>
+			timeout_awaiter/*bool*/ try_lock_until(const TimePoint& tp) const noexcept;
 
 
 			/**
@@ -117,16 +117,16 @@ namespace resumef
 			 * @param dt 超时时长
 			 * @param unique_address 代表获得锁的拥有者。
 			 */
-			template <class _Rep, class _Period>
-			bool try_lock_for(const std::chrono::duration<_Rep, _Period>& dt, void* unique_address);
+			template <_ChronoDurationT Duration>
+			bool try_lock_for(const Duration& dt, void* unique_address);
 
 			/**
 			 * @brief 尝试在非协程中加锁，直到超时。如果不能立即获得锁，则反复尝试，直到获得锁或超时。故会阻塞当前协程
 			 * @param tp 超时时刻
 			 * @param unique_address 代表获得锁的拥有者。
 			 */
-			template <class _Rep, class _Period>
-			bool try_lock_until(const std::chrono::time_point<_Rep, _Period>& tp, void* unique_address);
+			template <_ChronoTimePointT TimePoint>
+			bool try_lock_until(const TimePoint& tp, void* unique_address);
 
 			/**
 			 * @brief 在非协程中解锁。立即返回。由于立即返回，也可在协程中如此使用：mtx.unlock(root_state())

@@ -103,5 +103,23 @@ namespace resumef
 		template<typename _Ty>
 		concept is_awaitable_v = is_awaitable<_Ty>::value;
 
+		template <typename T>
+		struct is_std_chrono_duration : std::false_type {};
+
+		template <typename R, typename P>
+		struct is_std_chrono_duration<std::chrono::duration<R, P>> : std::true_type {};
+
+		template <typename T>
+		concept is_std_chrono_duration_v = is_std_chrono_duration<T>::value;
+
+		template <typename T>
+		struct is_std_chrono_time_point : std::false_type {};
+
+		template <typename C, typename D>
+		struct is_std_chrono_time_point<std::chrono::time_point<C, D>> : std::true_type {};
+
+		template <typename T>
+		concept is_std_chrono_time_point_v = is_std_chrono_time_point<T>::value;
+
 	}
 }

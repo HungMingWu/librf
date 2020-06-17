@@ -66,19 +66,17 @@ namespace event_v1
 			_event->reset();
 		}
 
-
-
 		future_t<bool>
 			wait() const;
-		template<class _Rep, class _Period>
+		template <_ChronoDurationT Duration>
 		future_t<bool>
-			wait_for(const std::chrono::duration<_Rep, _Period>& dt) const
+			wait_for(const Duration& dt) const
 		{
 			return wait_for_(std::chrono::duration_cast<clock_type::duration>(dt));
 		}
-		template<class _Clock, class _Duration>
+		template <_ChronoTimePointT TimePoint>
 		future_t<bool>
-			wait_until(const std::chrono::time_point<_Clock, _Duration>& tp) const
+			wait_until(const TimePoint& tp) const
 		{
 			return wait_until_(std::chrono::time_point_cast<clock_type::duration>(tp));
 		}
@@ -100,28 +98,28 @@ namespace event_v1
 			return wait_any_(make_event_vector(std::begin(cnt_), std::end(cnt_)));
 		}
 
-		template<class _Rep, class _Period, class _Iter>
+		template <_ChronoDurationT Duration, class _Iter>
 		static future_t<intptr_t>
-			wait_any_for(const std::chrono::duration<_Rep, _Period>& dt, _Iter begin_, _Iter end_)
+			wait_any_for(const Duration& dt, _Iter begin_, _Iter end_)
 		{
 			return wait_any_for_(std::chrono::duration_cast<clock_type::duration>(dt), make_event_vector(begin_, end_));
 		}
-		template<class _Rep, class _Period, class _Cont>
+		template <_ChronoDurationT Duration, class _Cont>
 		static future_t<intptr_t>
-			wait_any_for(const std::chrono::duration<_Rep, _Period>& dt, const _Cont& cnt_)
+			wait_any_for(const Duration& dt, const _Cont& cnt_)
 		{
 			return wait_any_for_(std::chrono::duration_cast<clock_type::duration>(dt), make_event_vector(std::begin(cnt_), std::end(cnt_)));
 		}
 
-		template<class _Clock, class _Duration, class _Iter>
+		template <_ChronoTimePointT TimePoint, class _Iter>
 		static future_t<intptr_t>
-			wait_any_until(const std::chrono::time_point<_Clock, _Duration>& tp, _Iter begin_, _Iter end_)
+			wait_any_until(const TimePoint& tp, _Iter begin_, _Iter end_)
 		{
 			return wait_any_until_(std::chrono::time_point_cast<clock_type::duration>(tp), make_event_vector(begin_, end_));
 		}
-		template<class _Clock, class _Duration, class _Cont>
+		template <_ChronoTimePointT TimePoint, class _Cont>
 		static future_t<intptr_t>
-			wait_any_until(const std::chrono::time_point<_Clock, _Duration>& tp, const _Cont& cnt_)
+			wait_any_until(const TimePoint& tp, const _Cont& cnt_)
 		{
 			return wait_any_until_(std::chrono::time_point_cast<clock_type::duration>(tp), make_event_vector(std::begin(cnt_), std::end(cnt_)));
 		}
@@ -143,28 +141,28 @@ namespace event_v1
 			return wait_all(std::begin(cnt_), std::end(cnt_));
 		}
 
-		template<class _Rep, class _Period, class _Iter>
+		template <_ChronoDurationT Duration, class _Iter>
 		static future_t<bool>
-			wait_all_for(const std::chrono::duration<_Rep, _Period>& dt, _Iter begin_, _Iter end_)
+			wait_all_for(const Duration& dt, _Iter begin_, _Iter end_)
 		{
 			return wait_all_for_(std::chrono::duration_cast<clock_type::duration>(dt), make_event_vector(begin_, end_));
 		}
-		template<class _Rep, class _Period, class _Cont>
+		template <_ChronoDurationT Duration, class _Cont>
 		static future_t<bool>
-			wait_all_for(const std::chrono::duration<_Rep, _Period>& dt, const _Cont& cnt_)
+			wait_all_for(const Duration& dt, const _Cont& cnt_)
 		{
 			return wait_all_for_(std::chrono::duration_cast<clock_type::duration>(dt), make_event_vector(std::begin(cnt_), std::end(cnt_)));
 		}
 
-		template<class _Clock, class _Duration, class _Iter>
+		template <_ChronoTimePointT TimePoint, class _Iter>
 		static future_t<bool>
-			wait_all_until(const std::chrono::time_point<_Clock, _Duration>& tp, _Iter begin_, _Iter end_)
+			wait_all_until(const TimePoint& tp, _Iter begin_, _Iter end_)
 		{
 			return wait_all_until_(std::chrono::time_point_cast<clock_type::duration>(tp), make_event_vector(begin_, end_));
 		}
-		template<class _Clock, class _Duration, class _Cont>
+		template <_ChronoTimePointT TimePoint, class _Cont>
 		static future_t<bool>
-			wait_all_until(const std::chrono::time_point<_Clock, _Duration>& tp, const _Cont& cnt_)
+			wait_all_until(const TimePoint& tp, const _Cont& cnt_)
 		{
 			return wait_all_until_(std::chrono::time_point_cast<clock_type::duration>(tp), make_event_vector(std::begin(cnt_), std::end(cnt_)));
 		}

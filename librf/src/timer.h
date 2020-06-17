@@ -97,23 +97,23 @@ namespace resumef
 		timer_manager();
 		~timer_manager();
 
-		template<class _Rep, class _Period, class _Cb>
-		timer_target_ptr add(const std::chrono::duration<_Rep, _Period> & dt_, _Cb && cb_)
+		template <_ChronoDurationT Duration, class _Cb>
+		timer_target_ptr add(const Duration & dt_, _Cb && cb_)
 		{
 			return add_(std::chrono::duration_cast<duration_type>(dt_), std::forward<_Cb>(cb_));
 		}
-		template<class _Clock, class _Duration = typename _Clock::duration, class _Cb>
-		timer_target_ptr add(const std::chrono::time_point<_Clock, _Duration> & tp_, _Cb && cb_)
+		template <_ChronoTimePointT TimePoint, class _Cb>
+		timer_target_ptr add(const TimePoint& tp_, _Cb && cb_)
 		{
 			return add_(std::chrono::time_point_cast<duration_type>(tp_), std::forward<_Cb>(cb_));
 		}
-		template<class _Rep, class _Period, class _Cb>
-		timer_handler add_handler(const std::chrono::duration<_Rep, _Period> & dt_, _Cb && cb_)
+		template <_ChronoDurationT Duration, class _Cb>
+		timer_handler add_handler(const Duration& dt_, _Cb && cb_)
 		{
 			return{ this, add(dt_, std::forward<_Cb>(cb_)) };
 		}
-		template<class _Clock, class _Duration = typename _Clock::duration, class _Cb>
-		timer_handler add_handler(const std::chrono::time_point<_Clock, _Duration> & tp_, _Cb && cb_)
+		template <_ChronoTimePointT TimePoint, class _Cb>
+		timer_handler add_handler(const TimePoint& tp_, _Cb && cb_)
 		{
 			return{ this, add(tp_, std::forward<_Cb>(cb_)) };
 		}

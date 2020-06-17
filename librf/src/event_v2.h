@@ -91,8 +91,8 @@ namespace resumef
 			 * @retval bool [co_await] 等到了信号返回true，超时了返回false。
 			 * @attention 只能在协程中调用。
 			 */
-			template<class _Rep, class _Period>
-			timeout_awaiter wait_for(const std::chrono::duration<_Rep, _Period>& dt) const noexcept;
+			template <_ChronoDurationT Duration>
+			timeout_awaiter wait_for(const Duration& dt) const noexcept;
 
 			/**
 			 * @brief 在协程中等待信号触发，直到超时。
@@ -103,8 +103,8 @@ namespace resumef
 			 * @retval bool [co_await] 等到了信号返回true，超时了返回false。
 			 * @attention 只能在协程中调用。
 			 */
-			template<class _Clock, class _Duration>
-			timeout_awaiter wait_until(const std::chrono::time_point<_Clock, _Duration>& tp) const noexcept;
+			template <_ChronoTimePointT TimePoint>
+			timeout_awaiter wait_until(const TimePoint& tp) const noexcept;
 
 
 			template<class _Iter>
@@ -123,14 +123,14 @@ namespace resumef
 			template<class _Iter>
 			struct [[nodiscard]] timeout_any_awaiter;
 
-			template<class _Rep, class _Period, class _Iter>
+			template <_ChronoDurationT Duration, class _Iter>
 			requires (_IteratorOfT<_Iter, event_t>)
-			static auto wait_any_for(const std::chrono::duration<_Rep, _Period>& dt, _Iter begin_, _Iter end_)
+			static auto wait_any_for(const Duration& dt, _Iter begin_, _Iter end_)
 				->timeout_any_awaiter<_Iter>;
 
-			template<class _Rep, class _Period, class _Cont>
+			template <_ChronoDurationT Duration, class _Cont>
 			requires (_ContainerOfT<_Cont, event_t>)
-			static auto wait_any_for(const std::chrono::duration<_Rep, _Period>& dt, const _Cont& cnt_)
+			static auto wait_any_for(const Duration& dt, const _Cont& cnt_)
 				->timeout_any_awaiter<decltype(std::begin(cnt_))>;
 
 			template<class _Iter>
@@ -149,14 +149,14 @@ namespace resumef
 			template<class _Iter>
 			struct [[nodiscard]] timeout_all_awaiter;
 
-			template<class _Rep, class _Period, class _Iter>
+			template<_ChronoDurationT Duration, class _Iter>
 			requires (_IteratorOfT<_Iter, event_t>)
-			static auto wait_all_for(const std::chrono::duration<_Rep, _Period>& dt, _Iter begin_, _Iter end_)
+			static auto wait_all_for(const Duration& dt, _Iter begin_, _Iter end_)
 				->timeout_all_awaiter<_Iter>;
 
-			template<class _Rep, class _Period, class _Cont>
+			template<_ChronoDurationT Duration, class _Cont>
 			requires (_ContainerOfT<_Cont, event_t>)
-			static auto wait_all_for(const std::chrono::duration<_Rep, _Period>& dt, const _Cont& cnt_)
+			static auto wait_all_for(const Duration& dt, const _Cont& cnt_)
 				->timeout_all_awaiter<decltype(std::begin(cnt_))>;
 
 			event_t(const event_t&) = default;
