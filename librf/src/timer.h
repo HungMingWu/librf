@@ -78,6 +78,8 @@ namespace resumef
 		bool expired() const;
 	};
 
+	template <typename T>
+	concept _TimerT = _ChronoDurationT<T> || _ChronoTimePointT<T>;
 	/**
 	 * @brief 定时器管理器。
 	 */
@@ -97,25 +99,24 @@ namespace resumef
 		timer_manager();
 		~timer_manager();
 
-		template <_ChronoDurationT Duration, class _Cb>
-		timer_target_ptr add(const Duration & dt_, _Cb && cb_)
+		template <_TimerT TimeType, class _Cb>
+		timer_target_ptr add(const TimeType& value, _Cb && cb_)
 		{
-			return add_(std::chrono::duration_cast<duration_type>(dt_), std::forward<_Cb>(cb_));
+			const auto tp = [&] {
+				if constexpr (_ChronoDurationT<TimeType>) {
+					return clock_type::now() + std::chrono::duration_cast<duration_type>(value);
+				}
+				else {
+					return std::chrono::time_point_cast<duration_type>(value);
+				}
+			}();
+			return add_(std::make_shared<timer_target>(tp, std::forward<_Cb>(cb_)));
 		}
-		template <_ChronoTimePointT TimePoint, class _Cb>
-		timer_target_ptr add(const TimePoint& tp_, _Cb && cb_)
+
+		template <_TimerT TimeType, class _Cb>
+		timer_handler add_handler(const TimeType& value, _Cb && cb_)
 		{
-			return add_(std::chrono::time_point_cast<duration_type>(tp_), std::forward<_Cb>(cb_));
-		}
-		template <_ChronoDurationT Duration, class _Cb>
-		timer_handler add_handler(const Duration& dt_, _Cb && cb_)
-		{
-			return{ this, add(dt_, std::forward<_Cb>(cb_)) };
-		}
-		template <_ChronoTimePointT TimePoint, class _Cb>
-		timer_handler add_handler(const TimePoint& tp_, _Cb && cb_)
-		{
-			return{ this, add(tp_, std::forward<_Cb>(cb_)) };
+			return { this, add(value, std::forward<_Cb>(cb_)) };
 		}
 
 		bool stop(const timer_target_ptr & sptr);
@@ -128,16 +129,7 @@ namespace resumef
 		void update();
 
 #ifndef DOXYGEN_SKIP_PROPERTY
-		template<class _Cb>
-		timer_target_ptr add_(const duration_type & dt_, _Cb && cb_)
-		{
-			return add_(std::make_shared<timer_target>(clock_type::now() + dt_, std::forward<_Cb>(cb_)));
-		}
-		template<class _Cb>
-		timer_target_ptr add_(const time_point_type & tp_, _Cb && cb_)
-		{
-			return add_(std::make_shared<timer_target>(tp_, std::forward<_Cb>(cb_)));
-		}
+
 	private:
 #if !RESUMEF_DISABLE_MULT_THREAD
 		spinlock _added_mtx;
