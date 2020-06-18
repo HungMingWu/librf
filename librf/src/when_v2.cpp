@@ -9,22 +9,6 @@ namespace resumef
 		{
 		}
 
-		void state_when_t::resume()
-		{
-			coroutine_handle<> handler = _coro;
-			if (handler)
-			{
-				_coro = nullptr;
-				_scheduler->del_final(this);
-				handler.resume();
-			}
-		}
-
-		bool state_when_t::has_handler() const  noexcept
-		{
-			return (bool)_coro;
-		}
-
 		void state_when_t::on_cancel() noexcept
 		{
 			std::scoped_lock lock_(_lock);

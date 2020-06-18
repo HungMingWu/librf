@@ -24,9 +24,6 @@ namespace resumef
 		{
 			state_when_t(intptr_t counter_);
 
-			void resume() override;
-			bool has_handler() const  noexcept override;
-
 			void on_cancel() noexcept;
 			bool on_notify_one();
 			bool on_timeout();

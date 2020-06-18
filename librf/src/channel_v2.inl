@@ -13,22 +13,6 @@ namespace detail
 		{
 		}
 
-		void resume() override
-		{
-			coroutine_handle<> handler = _coro;
-			if (handler)
-			{
-				_coro = nullptr;
-				_scheduler->del_final(this);
-				handler.resume();
-			}
-		}
-
-		bool has_handler() const  noexcept override
-		{
-			return (bool)_coro;
-		}
-
 		void on_notify()
 		{
 			assert(this->_scheduler != nullptr);

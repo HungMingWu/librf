@@ -6,9 +6,6 @@ namespace resumef
 	{
 		struct state_event_base_t : public state_base_t
 		{
-			void resume() override;
-			bool has_handler() const  noexcept override;
-
 			virtual void on_cancel() noexcept = 0;
 			virtual bool on_notify(event_v2_impl* eptr) = 0;
 			virtual bool on_timeout() = 0;

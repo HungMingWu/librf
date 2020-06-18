@@ -3,23 +3,7 @@
 namespace resumef
 {
 	namespace detail
-	{
-		void state_mutex_t::resume()
-		{
-			coroutine_handle<> handler = _coro;
-			if (handler)
-			{
-				_coro = nullptr;
-				_scheduler->del_final(this);
-				handler.resume();
-			}
-		}
-
-		bool state_mutex_t::has_handler() const  noexcept
-		{
-			return (bool)_coro;
-		}
-		
+	{	
 		state_base_t* state_mutex_t::get_parent() const noexcept
 		{
 			return _root;

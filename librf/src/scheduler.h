@@ -2,6 +2,15 @@
 
 namespace resumef
 {
+#if RESUMEF_DISABLE_MULT_THREAD
+	struct scheduler_lock {
+		inline void lock() noexcept {}
+		inline void unlock() noexcept {}
+		inline bool try_lock() noexcept { return true; }
+	};;
+#else
+	using scheduler_lock = spinlock;
+#endif
 	/**
 	 * @brief 协程调度器。
 	 * @details librf的设计原则之一，就是要将协程绑定在固定的调度器里执行。
@@ -14,15 +23,13 @@ namespace resumef
 		using state_vector = std::vector<state_sptr>;
 		using task_dictionary_type = std::unordered_map<state_base_t*, std::unique_ptr<task_t>>;
 
-#if !RESUMEF_DISABLE_MULT_THREAD
-		mutable spinlock _lock_running;
-#endif
+		mutable scheduler_lock _lock_running;
+
 		state_vector _runing_states;
 		state_vector _cached_states;
 
-#if !RESUMEF_DISABLE_MULT_THREAD
-		mutable spinlock _lock_ready;
-#endif
+		mutable scheduler_lock _lock_ready;
+
 		task_dictionary_type _ready_task;
 
 		timer_mgr_ptr _timer;
@@ -72,9 +79,7 @@ namespace resumef
 		 */
 		bool empty() const
 		{
-#if !RESUMEF_DISABLE_MULT_THREAD
 			std::scoped_lock __guard(_lock_ready, _lock_running);
-#endif
 			return _ready_task.empty() && _runing_states.empty() && _timer->empty();
 		}
 

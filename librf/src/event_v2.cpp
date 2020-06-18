@@ -4,22 +4,6 @@ namespace resumef
 {
 	namespace detail
 	{
-		void state_event_base_t::resume()
-		{
-			coroutine_handle<> handler = _coro;
-			if (handler)
-			{
-				_coro = nullptr;
-				_scheduler->del_final(this);
-				handler.resume();
-			}
-		}
-
-		bool state_event_base_t::has_handler() const  noexcept
-		{
-			return (bool)_coro;
-		}
-
 		void state_event_t::on_cancel() noexcept
 		{
 			event_v2_impl** oldValue = _value.load(std::memory_order_acquire);

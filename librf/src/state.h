@@ -34,8 +34,8 @@ namespace resumef
 	private:
 		virtual void destroy_deallocate();
 	public:
-		virtual void resume() = 0;
-		virtual bool has_handler() const  noexcept = 0;
+		virtual void resume();
+		virtual bool has_handler() const noexcept { return (bool)_coro; }
 		virtual state_base_t* get_parent() const noexcept;
 
 		void set_scheduler(scheduler_t* sch) noexcept

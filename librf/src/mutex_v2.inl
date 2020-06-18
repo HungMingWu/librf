@@ -10,8 +10,6 @@ namespace resumef
 				: _value(&val)
 			{}
 
-			void resume() override;
-			bool has_handler() const  noexcept override;
 			state_base_t* get_parent() const noexcept override;
 
 			void on_cancel() noexcept;

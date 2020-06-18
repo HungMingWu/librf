@@ -10,7 +10,16 @@ namespace resumef
 	{
 		delete this;
 	}
-	
+	void state_base_t::resume()
+	{
+		coroutine_handle<> handler = _coro;
+		if (handler)
+		{
+			_coro = nullptr;
+			_scheduler->del_final(this);
+			handler.resume();
+		}
+	}
 	state_base_t* state_base_t::get_parent() const noexcept
 	{
 		return nullptr;

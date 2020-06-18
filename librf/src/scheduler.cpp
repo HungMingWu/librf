@@ -98,9 +98,7 @@ namespace resumef
 		sptr->set_scheduler(this);
 
 		{
-#if !RESUMEF_DISABLE_MULT_THREAD
 			std::scoped_lock __guard(_lock_ready);
-#endif
 			_ready_task.emplace(sptr, task);
 		}
 
@@ -115,9 +113,7 @@ namespace resumef
 
 	std::unique_ptr<task_t> scheduler_t::del_switch(state_base_t* sptr)
 	{
-#if !RESUMEF_DISABLE_MULT_THREAD
 		std::scoped_lock __guard(_lock_ready);
-#endif
 	
 		std::unique_ptr<task_t> task_ptr;
 
