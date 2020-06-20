@@ -148,9 +148,8 @@ namespace resumef
 		this->_timer->update();
 
 		{
-#if !RESUMEF_DISABLE_MULT_THREAD
 			std::scoped_lock __guard(_lock_running);
-#endif
+
 			if (likely(_runing_states.empty()))
 				return false;
 
@@ -174,9 +173,7 @@ namespace resumef
 			if (likely(this->run_one_batch())) continue;	//当前运行了一个state，则认为还可能有任务未完成
 
 			{
-#if !RESUMEF_DISABLE_MULT_THREAD
 				std::scoped_lock __guard(_lock_ready);
-#endif
 				if (likely(!_ready_task.empty())) continue;	//当前还存在task，则必然还有任务未完成
 			}
 			if (unlikely(!_timer->empty())) continue;			//定时器不为空，也需要等待定时器触发

@@ -2,6 +2,15 @@
 
 namespace resumef
 {
+#if RESUMEF_DISABLE_MULT_THREAD
+	struct timer_lock {
+		inline void lock() noexcept {}
+		inline void unlock() noexcept {}
+		inline bool try_lock() noexcept { return true; }
+	};;
+#else
+	using timer_lock = spinlock;
+#endif
 	struct timer_manager;
 	typedef std::shared_ptr<timer_manager> timer_mgr_ptr;
 	typedef std::weak_ptr<timer_manager> timer_mgr_wptr;
@@ -131,9 +140,8 @@ namespace resumef
 #ifndef DOXYGEN_SKIP_PROPERTY
 
 	private:
-#if !RESUMEF_DISABLE_MULT_THREAD
-		spinlock _added_mtx;
-#endif
+		timer_lock _added_mtx;
+
 		timer_vector_type	_added_timers;
 		timer_map_type		_runing_timers;
 

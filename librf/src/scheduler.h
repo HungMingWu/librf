@@ -149,17 +149,13 @@ namespace resumef
 	{
 		assert(sptr != nullptr);
 
-#if !RESUMEF_DISABLE_MULT_THREAD
 		std::scoped_lock __guard(_lock_running);
-#endif
 		_runing_states.emplace_back(sptr);
 	}
 
 	inline void scheduler_t::del_final(state_base_t* sptr)
 	{
-#if !RESUMEF_DISABLE_MULT_THREAD
 		std::scoped_lock __guard(_lock_ready);
-#endif
 		this->_ready_task.erase(sptr);
 	}
 
@@ -167,17 +163,13 @@ namespace resumef
 	{
 		state_base_t* sptr = task->_state.get();
 
-#if !RESUMEF_DISABLE_MULT_THREAD
 		std::scoped_lock __guard(_lock_ready);
-#endif
 		this->_ready_task.emplace(sptr, std::move(task));
 	}
 
 	inline task_t* scheduler_t::find_task(state_base_t* sptr) const noexcept
 	{
-#if !RESUMEF_DISABLE_MULT_THREAD
 		std::scoped_lock __guard(_lock_ready);
-#endif
 
 		auto iter = this->_ready_task.find(sptr);
 		if (iter != this->_ready_task.end())
